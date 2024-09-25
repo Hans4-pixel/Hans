@@ -5,6 +5,14 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { argv, exit } from 'node:process';
+// Put the lavamoat repo next to metamask-extension
+// git clone git@github.com:LavaMoat/LavaMoat.git
+// cd LavaMoat
+// git checkout webpack-in-extension
+// When we're done, we'll switch back to @lavamoat/webpack
+// eslint-disable-next-line import/order
+import LavamoatPlugin from '../../../LavaMoat/packages/webpack';
+
 import {
   ProvidePlugin,
   type Configuration,
@@ -42,9 +50,6 @@ if (args.dryRun) {
 }
 
 // #region short circuit for unsupported build configurations
-if (args.lavamoat) {
-  throw new Error("The webpack build doesn't support LavaMoat yet. So sorry.");
-}
 if (args.manifest_version === 3) {
   throw new Error(
     "The webpack build doesn't support manifest_version version 3 yet. So sorry.",
@@ -53,6 +58,7 @@ if (args.manifest_version === 3) {
 // #endregion short circuit for unsupported build configurations
 
 const context = join(__dirname, '../../app');
+const projectRoot = join(__dirname, '../../'); // While ../../app is the main dir for the webpack build to use as context, the project root where package.json is one level up. This discrepancy needs to be explained to LavaMoat plugin as it's searching for the package.json in the compilator.context by default.
 const isDevelopment = args.env === 'development';
 const MANIFEST_VERSION = args.manifest_version;
 const manifestPath = join(context, `manifest/v${MANIFEST_VERSION}/_base.json`);
@@ -100,6 +106,7 @@ const cache = args.cache
 // #region plugins
 const commitHash = isDevelopment ? getLatestCommit().hash() : null;
 const plugins: WebpackPluginInstance[] = [
+  // TODO: we need to have a separate config for inpage because it (and its dependencies) are not supposed to be wrapped with LavaMoat
   new SelfInjectPlugin({ test: /^scripts\/inpage\.js$/u }),
   // HtmlBundlerPlugin treats HTML files as entry points
   new HtmlBundlerPlugin({
@@ -160,6 +167,21 @@ const plugins: WebpackPluginInstance[] = [
     ],
   }),
 ];
+if (args.lavamoat) {
+  plugins.push(
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore: webpack plugin types might differ when the plugin is loaded from a neighboring folder instead of the properly deduplicated dependencies of the project. Remove this when the plugin is properly installed.
+    new LavamoatPlugin({
+      rootDir: projectRoot,
+      diagnosticsVerbosity: 2,
+      generatePolicy: true,
+      runChecks: true, // Candidate to disable later for performance. useful in debugging invalid JS errors, but unless the audit proves me wrong this is probably not improving security.
+      readableResourceIds: true,
+      inlineLockdown: /^runtime|contentscript\.js/u,
+      debugRuntime: true,
+    }),
+  );
+}
 // enable React Refresh in 'development' mode when `watch` is enabled
 if (__HMR_READY__ && isDevelopment && args.watch) {
   const ReactRefreshWebpackPlugin: typeof ReactRefreshPluginType = require('@pmmmwh/react-refresh-webpack-plugin');
