@@ -18,91 +18,108 @@ const ECMA_SIZES = {
   Float64Array: 8,
 };
 
-const isNodePlatform =
-  typeof process === 'object' && typeof require === 'function';
-
-function allProperties(obj) {
-  const stringProperties = [];
-  for (const prop in obj) {
-    if (Object.hasOwn(obj, prop)) {
-      stringProperties.push(prop);
+/**
+ * Get the size of a primitive value.
+ *
+ * @param {unknown} data - The primitive value to measure.
+ * @param {ReturnType<typeof unknown>} dataType - The type of the value.
+ * @throws Throws if the type is not a recognized primitive value.
+ */
+function getPrimitiveSize(data, dataType) {
+  if (data === null || data === undefined) {
+    return 1;
+  }
+  switch (dataType) {
+    case 'string':
+      // https://stackoverflow.com/questions/68789144/how-much-memory-do-v8-take-to-store-a-string/68791382#68791382
+      return data.length * ECMA_SIZES.STRING;
+    case 'boolean':
+      return ECMA_SIZES.BOOLEAN;
+    case 'number':
+      return ECMA_SIZES.NUMBER;
+    case 'symbol': {
+      const isGlobalSymbol = Symbol.keyFor && Symbol.keyFor(data);
+      return isGlobalSymbol
+        ? Symbol.keyFor(data).length * ECMA_SIZES.STRING
+        : (data.toString().length - 8) * ECMA_SIZES.STRING;
     }
+    default:
+      throw new Error(`Unrecognized type '${dataType}'`);
   }
-  if (Object.getOwnPropertySymbols) {
-    const symbolProperties = Object.getOwnPropertySymbols(obj);
-    Array.prototype.push.apply(stringProperties, symbolProperties);
-  }
-  return stringProperties;
 }
 
-function sizeOfObject(state, object) {
-  if (object === null) {
-    return;
-  }
-
-  const properties = allProperties(object);
-  const calc = getCalculator(state);
-  for (let i = 0; i < properties.length; i++) {
-    const key = properties[i];
-    calc(key);
-    calc(object[key]);
-  }
-}
-
-function getCalculator(state) {
-  return function calculator(object) {
-    if (state.size > state.maxSize) {
-      throw new Error('object exceeded max size');
-    }
-    if (Buffer.isBuffer(object)) {
-      state.size += object.length;
-    }
-
-    const objectType = typeof object;
-    switch (objectType) {
-      case 'string':
-        // https://stackoverflow.com/questions/68789144/how-much-memory-do-v8-take-to-store-a-string/68791382#68791382
-        state.size += isNodePlatform
-          ? 12 + 4 * Math.ceil(object.length / 4)
-          : object.length * ECMA_SIZES.STRING;
-        return;
-      case 'boolean':
-        state.size += ECMA_SIZES.BOOLEAN;
-        return;
-      case 'number':
-        state.size += ECMA_SIZES.NUMBER;
-        return;
-      case 'symbol': {
-        const isGlobalSymbol = Symbol.keyFor && Symbol.keyFor(object);
-        state.size += isGlobalSymbol
-          ? Symbol.keyFor(object).length * ECMA_SIZES.STRING
-          : (object.toString().length - 8) * ECMA_SIZES.STRING;
-        return;
-      }
-      case 'object':
-        if (Array.isArray(object)) {
-          const calc = getCalculator(state);
-          object.forEach((value) => {
-            calc(value);
-          });
-        } else {
-          sizeOfObject(state, object);
-        }
-        return
-      default:
-        return
-    }
-  };
+function isPrimitive(data, dataType) {
+  return data === null || dataType !== 'object';
 }
 
 /**
- * Main module's entry point
- * Calculates Bytes for the provided parameter
+ * Assert that the data is below a certain size, in bytes.
  *
- * @param object - handles object/string/boolean/buffer
- * @param maxSize
- * @returns {*}
+ * The size of the data is estimated piece by piece, halting and throwing an
+ * error if the maximum size is reached.
+ *
+ * @param {unknown} data - The data to measure.
+ * @param {number} [maxSize] - The maximum size, in bytes.
+ * @throws Throws if the estimated size of the data exceeds the maximum size.
  */
-export function assertObjectMaxSize(object, maxSize = 0) {
-  getCalculator({ size: 0, maxSize })(object);
+export function assertObjectMaxSize(data, maxSize = 0) {
+  let size = 0;
+
+  /**
+   * Count the size of a primitive value.
+   *
+   * @param {unknown} value - The value to count.
+   * @param {ReturnType<typeof unknown>} valueType - The type of the value.
+   * @throws Throws if the estimated size of all data counted so far exceeds the maximum size.
+   */
+  function countPrimitiveSize(value, valueType) {
+    size += getPrimitiveSize(value, valueType);
+    if (size > maxSize) {
+      throw new Error('object exceeded max size');
+    }
+  }
+
+  const topLevelType = typeof data;
+  if (isPrimitive(data, topLevelType)) {
+    countPrimitiveSize(data, topLevelType);
+    return;
+  }
+
+  const objects = [data];
+
+  /**
+   * Count the size of a value. If the value is a non-primitive value, it's registered as an object
+   * to be counted later.
+   *
+   * @param {unknown} value - The value to count.
+   * @throws Throws if the estimated size of all data counted so far exceeds the maximum size.
+   */
+  function countValueSize(value) {
+    const valueType = typeof value;
+    if (isPrimitive(value, valueType)) {
+      countPrimitiveSize(value, valueType);
+    } else {
+      objects.push(value);
+    }
+  }
+
+  for (const object of objects) {
+    if (Array.isArray(object)) {
+      for (const value of object) {
+        countValueSize(value);
+      }
+    } else {
+      // Iterate through keys first because they're faster to count, minimizing the number of
+      // object references we need to track before stopping
+      for (const key of Object.keys(object)) {
+        countValueSize(key);
+      }
+      for (const value of Object.values(object)) {
+        countValueSize(value);
+      }
+    }
+    // Delete object reference after it has been counted, to prevent objects array from growing
+    // unbounded
+    objects.shift();
+  }
 }
