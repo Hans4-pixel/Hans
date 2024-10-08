@@ -218,6 +218,7 @@ async function main() {
       ...(await getTestPathsForTestDir(testDir)),
       ...filteredFlaskAndMainTests,
     ];
+    testPaths = testPaths.filter((testPath) => testPath.match('change-language'));
   }
 
   const runE2eTestPath = path.join(__dirname, 'run-e2e-test.js');

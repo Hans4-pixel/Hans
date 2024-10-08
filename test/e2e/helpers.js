@@ -54,53 +54,69 @@ const convertETHToHexGwei = (eth) => convertToHexValue(eth * 10 ** 18);
 
 /**
  *
- * @param {object} options
- * @param {(fixtures: Fixtures) => Promise<void>} testSuite
+ * @returns {{ start: (options: object ) => Promise<Fixtures>}}
  */
-async function withFixtures(options, testSuite) {
-  const {
-    dapp,
-    fixtures,
-    ganacheOptions,
-    smartContract,
-    driverOptions,
-    dappOptions,
-    title,
-    ignoredConsoleErrors = [],
-    dappPath = undefined,
-    disableGanache,
-    disableServerMochaToBackground = false,
-    dappPaths,
-    testSpecificMock = function () {
-      // do nothing.
-    },
-    useBundler,
-    usePaymaster,
-    ethConversionInUsd,
-    manifestFlags,
-  } = options;
-
-  const fixtureServer = new FixtureServer();
-  let ganacheServer;
-  if (!disableGanache) {
-    ganacheServer = new Ganache();
+function withFixtures() {
+  let tempEnd;
+  afterEach(async function() {
+    if (tempEnd) {
+      await tempEnd.call(this);
+    }
   }
-  const bundlerServer = new Bundler();
-  const https = await mockttp.generateCACertificate();
-  const mockServer = mockttp.getLocal({ https, cors: true });
-  const secondaryGanacheServer = [];
-  let numberOfDapps = dapp ? 1 : 0;
-  const dappServer = [];
-  const phishingPageServer = new PhishingWarningPageServer();
+  );
+  return { start }
 
-  if (!disableServerMochaToBackground) {
-    getServerMochaToBackground();
-  }
+  /**
+   *
+   * @param {object} options
+   * @returns {Promise<Fixtures>}
+   *
+   */
+  async function start(options) {
+    tempEnd = end;
+    const {
+      dapp,
+      fixtures,
+      ganacheOptions,
+      smartContract,
+      driverOptions,
+      dappOptions,
+      title,
+      ignoredConsoleErrors = [],
+      dappPath = undefined,
+      disableGanache,
+      disableServerMochaToBackground = false,
+      dappPaths,
+      testSpecificMock = function () {
+        // do nothing.
+      },
+      useBundler,
+      usePaymaster,
+      ethConversionInUsd,
+      manifestFlags,
+    } = options;
 
-  let webDriver;
-  let driver;
-  let failed = false;
-  try {
+    const fixtureServer = new FixtureServer();
+    let ganacheServer;
+    if (!disableGanache) {
+      ganacheServer = new Ganache();
+    }
+    const bundlerServer = new Bundler();
+    const https = await mockttp.generateCACertificate();
+    const mockServer = mockttp.getLocal({ https, cors: true });
+    const secondaryGanacheServer = [];
+    let numberOfDapps = dapp ? 1 : 0;
+    const dappServer = [];
+    const phishingPageServer = new PhishingWarningPageServer();
+
+    if (!disableServerMochaToBackground) {
+      getServerMochaToBackground();
+    }
+
+    let webDriver;
+    let driver;
+    let failed = false;
+
     if (!disableGanache) {
       await ganacheServer.start(ganacheOptions);
     }
@@ -214,7 +230,7 @@ async function withFixtures(options, testSuite) {
 
     console.log(`\nExecuting testcase: '${title}'\n`);
 
-    await testSuite({
+    return ({
       driver: driverProxy ?? driver,
       contractRegistry,
       ganacheServer,
@@ -224,124 +240,133 @@ async function withFixtures(options, testSuite) {
       mockServer,
     });
 
-    const errorsAndExceptions = driver.summarizeErrorsAndExceptions();
-    if (errorsAndExceptions) {
-      throw new Error(errorsAndExceptions);
-    }
 
-    // Evaluate whether any new hosts received network requests during E2E test
-    // suite execution. If so, fail the test unless the
-    // --update-privacy-snapshot was specified. In that case, update the
-    // snapshot file.
-    const privacySnapshotRaw = readFileSync('./privacy-snapshot.json');
-    const privacySnapshot = JSON.parse(privacySnapshotRaw);
-    const privacyReport = getPrivacyReport();
 
-    // We must add to our privacyReport all of the known hosts that are
-    // included in the privacySnapshot. If no new hosts were requested during
-    // this test suite execution, then the mergedReport and the privacySnapshot
-    // should be identical.
-    const mergedReport = [
-      ...new Set([...privacyReport, ...privacySnapshot]),
-    ].sort();
 
-    // To determine if a new host was requested, we use the lodash difference
-    // method to generate an array of the items included in the first argument
-    // but not in the second
-    const newHosts = difference(mergedReport, privacySnapshot);
+    async function end() {
+      if (this.currentTest.state === 'passed') {
+        const errorsAndExceptions = driver.summarizeErrorsAndExceptions();
+        if (errorsAndExceptions) {
+          throw new Error(errorsAndExceptions);
+        }
 
-    if (newHosts.length > 0) {
-      if (process.env.UPDATE_PRIVACY_SNAPSHOT === 'true') {
-        writeFileSync(
-          './privacy-snapshot.json',
-          JSON.stringify(mergedReport, null, 2),
-        );
-      } else {
-        throw new Error(
-          `A new host not contained in the privacy-snapshot received a network
+        // Evaluate whether any new hosts received network requests during E2E test
+        // suite execution. If so, fail the test unless the
+        // --update-privacy-snapshot was specified. In that case, update the
+        // snapshot file.
+        const privacySnapshotRaw = readFileSync('./privacy-snapshot.json');
+        const privacySnapshot = JSON.parse(privacySnapshotRaw);
+        const privacyReport = getPrivacyReport();
+
+        // We must add to our privacyReport all of the known hosts that are
+        // included in the privacySnapshot. If no new hosts were requested during
+        // this test suite execution, then the mergedReport and the privacySnapshot
+        // should be identical.
+        const mergedReport = [
+          ...new Set([...privacyReport, ...privacySnapshot]),
+        ].sort();
+
+        // To determine if a new host was requested, we use the lodash difference
+        // method to generate an array of the items included in the first argument
+        // but not in the second
+        const newHosts = difference(mergedReport, privacySnapshot);
+
+        if (newHosts.length > 0) {
+          if (process.env.UPDATE_PRIVACY_SNAPSHOT === 'true') {
+            writeFileSync(
+              './privacy-snapshot.json',
+              JSON.stringify(mergedReport, null, 2),
+            );
+          } else {
+            throw new Error(
+              `A new host not contained in the privacy-snapshot received a network
            request during test execution. Please update the privacy-snapshot
            file by passing the --update-privacy-snapshot option to the test
            command or add the new hosts to the snapshot manually.
 
            New hosts found: ${newHosts}.`,
-        );
-      }
-    }
-
-    // At this point the suite has executed successfully, so we can log out a success message
-    // (Note: a Chrome browser error will unfortunately pop up after this success message)
-    console.log(`\nSuccess on testcase: '${title}'\n`);
-  } catch (error) {
-    failed = true;
-    if (webDriver) {
-      try {
-        await driver.verboseReportOnFailure(title, error);
-      } catch (verboseReportError) {
-        console.error(verboseReportError);
-      }
-      if (
-        process.env.E2E_LEAVE_RUNNING !== 'true' &&
-        (driver.errors.length > 0 || driver.exceptions.length > 0)
-      ) {
-        /**
-         * Navigate to the background
-         * forcing background exceptions to be captured
-         * proving more helpful context
-         */
-        await driver.navigate(PAGES.BACKGROUND);
-      }
-    }
-
-    // Add information to the end of the error message that should surface in the "Tests" tab of CircleCI
-    if (process.env.CIRCLE_NODE_INDEX) {
-      error.message += `\n  (Ran on CircleCI Node ${process.env.CIRCLE_NODE_INDEX} of ${process.env.CIRCLE_NODE_TOTAL}, Job ${process.env.CIRCLE_JOB})`;
-    }
-
-    throw error;
-  } finally {
-    if (!failed || process.env.E2E_LEAVE_RUNNING !== 'true') {
-      await fixtureServer.stop();
-      if (ganacheServer) {
-        await ganacheServer.quit();
-      }
-
-      if (ganacheOptions?.concurrent) {
-        secondaryGanacheServer.forEach(async (server) => {
-          await server.quit();
-        });
-      }
-
-      if (useBundler) {
-        await bundlerServer.stop();
-      }
-
-      if (webDriver) {
-        await driver.quit();
-      }
-      if (dapp) {
-        for (let i = 0; i < numberOfDapps; i++) {
-          if (dappServer[i] && dappServer[i].listening) {
-            await new Promise((resolve, reject) => {
-              dappServer[i].close((error) => {
-                if (error) {
-                  return reject(error);
-                }
-                return resolve();
-              });
-            });
+            );
           }
         }
+
+        // At this point the suite has executed successfully, so we can log out a success message
+        // (Note: a Chrome browser error will unfortunately pop up after this success message)
+        console.log(`\nSuccess on testcase: '${title}'\n`);
+
       }
-      if (phishingPageServer.isRunning()) {
-        await phishingPageServer.quit();
+      else if (this.currentTest.state === 'failed') {
+        failed = true;
+        if (webDriver) {
+          try {
+            await driver.verboseReportOnFailure(title, this.currentTest.err);
+          } catch (verboseReportError) {
+            console.error(verboseReportError);
+          }
+          if (
+            process.env.E2E_LEAVE_RUNNING !== 'true' &&
+            (driver.errors.length > 0 || driver.exceptions.length > 0)
+          ) {
+            /**
+             * Navigate to the background
+             * forcing background exceptions to be captured
+             * proving more helpful context
+             */
+            await driver.navigate(PAGES.BACKGROUND);
+          }
+        }
+
+        // Add information to the end of the error message that should surface in the "Tests" tab of CircleCI
+        if (process.env.CIRCLE_NODE_INDEX) {
+          error.message += `\n  (Ran on CircleCI Node ${process.env.CIRCLE_NODE_INDEX} of ${process.env.CIRCLE_NODE_TOTAL}, Job ${process.env.CIRCLE_JOB})`;
+        }
+
       }
 
-      // Since mockServer could be stop'd at another location,
-      // use a try/catch to avoid an error
-      try {
-        await mockServer.stop();
-      } catch (e) {
-        console.log('mockServer already stopped');
+
+      if (!failed || process.env.E2E_LEAVE_RUNNING !== 'true') {
+        await fixtureServer.stop();
+        if (ganacheServer) {
+          await ganacheServer.quit();
+        }
+
+        if (ganacheOptions?.concurrent) {
+          secondaryGanacheServer.forEach(async (server) => {
+            await server.quit();
+          });
+        }
+
+        if (useBundler) {
+          await bundlerServer.stop();
+        }
+
+        if (webDriver) {
+          await driver.quit();
+        }
+        if (dapp) {
+          for (let i = 0; i < numberOfDapps; i++) {
+            if (dappServer[i] && dappServer[i].listening) {
+              await new Promise((resolve, reject) => {
+                dappServer[i].close((error) => {
+                  if (error) {
+                    return reject(error);
+                  }
+                  return resolve();
+                });
+              });
+            }
+          }
+        }
+        if (phishingPageServer.isRunning()) {
+          await phishingPageServer.quit();
+        }
+
+        // Since mockServer could be stop'd at another location,
+        // use a try/catch to avoid an error
+        try {
+          await mockServer.stop();
+        } catch (e) {
+          console.log('mockServer already stopped');
+        }
       }
     }
   }
