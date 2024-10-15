@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import Modal from '../../modal';
-import TextField from '../../../ui/text-field';
 import {
   TextVariant,
   AlignItems,
@@ -18,6 +17,8 @@ import {
   ButtonLink,
   IconName,
   Text,
+  TextField,
+  TextFieldSize,
 } from '../../../component-library';
 
 const CustomizeNonce = ({
@@ -105,8 +106,10 @@ const CustomizeNonce = ({
           <div className="customize-nonce-modal__input">
             <TextField
               type="number"
-              data-testid="custom-nonce-input"
-              min="0"
+              inputProps={{
+                'data-testid': 'custom-nonce-input',
+                min: '0',
+              }}
               placeholder={
                 customNonceValue ||
                 (typeof nextNonce === 'number' && nextNonce.toString())
@@ -114,10 +117,10 @@ const CustomizeNonce = ({
               onChange={(e) => {
                 setCustomNonce(e.target.value);
               }}
-              fullWidth
-              margin="dense"
+              width={BlockSize.Full}
               value={customNonce}
               id="custom-nonce-id"
+              size={TextFieldSize.Lg}
             />
           </div>
         </Box>
