@@ -9,6 +9,7 @@ import {
   sum,
 } from 'lodash';
 import { keccak256 } from 'ethereum-cryptography/keccak';
+import { bufferToHex } from '@ethereumjs/util';
 import { v4 as uuidv4 } from 'uuid';
 import { NameControllerState, NameType } from '@metamask/name-controller';
 import { AccountsControllerState } from '@metamask/accounts-controller';

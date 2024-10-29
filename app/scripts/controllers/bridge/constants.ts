@@ -1,4 +1,4 @@
-import { zeroAddress } from 'ethereumjs-util';
+import { zeroAddress } from '@ethereumjs/util';
 import { Hex } from '@metamask/utils';
 import { METABRIDGE_ETHEREUM_ADDRESS } from '../../../../shared/constants/bridge';
 import { CHAIN_IDS } from '../../../../shared/constants/network';

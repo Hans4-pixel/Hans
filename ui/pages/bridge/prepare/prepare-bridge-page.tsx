@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import classnames from 'classnames';
 import { debounce } from 'lodash';
 import { Hex } from '@metamask/utils';
-import { zeroAddress } from 'ethereumjs-util';
+import { zeroAddress } from '@ethereumjs/util';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   setDestTokenExchangeRates,

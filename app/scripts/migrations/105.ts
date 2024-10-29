@@ -1,6 +1,6 @@
 import { EthAccountType, InternalAccount } from '@metamask/keyring-api';
 import { sha256 } from '@noble/hashes/sha256';
-import { toBuffer } from 'ethereumjs-util';
+import { toBuffer } from '@ethereumjs/util';
 import { v4 as uuid } from 'uuid';
 import { cloneDeep } from 'lodash';
 import { ETH_EOA_METHODS } from '../../../shared/constants/eth-methods';

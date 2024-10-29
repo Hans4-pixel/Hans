@@ -1,5 +1,5 @@
 import { useDispatch } from 'react-redux';
-import { zeroAddress } from 'ethereumjs-util';
+import { zeroAddress } from '@ethereumjs/util';
 import { useHistory } from 'react-router-dom';
 import { TransactionMeta } from '@metamask/transaction-controller';
 import { QuoteMetadata, QuoteResponse } from '../types';
