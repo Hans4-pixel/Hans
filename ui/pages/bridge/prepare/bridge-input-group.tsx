@@ -21,7 +21,7 @@ import {
   ERC20Asset,
   NativeAsset,
 } from '../../../components/multichain/asset-picker-amount/asset-picker-modal/types';
-import { zeroAddress } from '../../../__mocks__/@ethereumjs/util';
+import { zeroAddress } from '../../../__mocks__/ethereumjs-util';
 import { AssetType } from '../../../../shared/constants/transaction';
 import {
   CHAIN_ID_TO_CURRENCY_SYMBOL_MAP,
