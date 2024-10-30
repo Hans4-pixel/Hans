@@ -44,7 +44,7 @@ const customTransaction = ({
   };
   // just simulate hash if not provided
   if (!props?.hash) {
-    tx.hash = `0x${keccak256(Buffer.from(JSON.stringify(tx))).toString('hex')}`;
+    tx.hash = `0x${Buffer.from(keccak256(Buffer.from(JSON.stringify(tx)))).toString('hex')}`;
   }
   return tx;
 };
