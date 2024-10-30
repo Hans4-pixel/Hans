@@ -524,10 +524,12 @@ export default class MetaMetricsController extends BaseController<
 
   generateMetaMetricsId(): string {
     return bufferToHex(
-      keccak(
-        Buffer.from(
-          String(Date.now()) +
-            String(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)),
+      Buffer.from(
+        keccak256(
+          Buffer.from(
+            String(Date.now()) +
+              String(Math.round(Math.random() * Number.MAX_SAFE_INTEGER)),
+          ),
         ),
       ),
     );
