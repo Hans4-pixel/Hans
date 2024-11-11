@@ -85,6 +85,7 @@ export default function NftsTab() {
         referrer: ORIGIN_METAMASK,
       },
     });
+    endTrace({ name: TraceName.AccountOverviewNftsTabFMP });
     endTrace({ name: TraceName.AccountOverviewNftsTab });
   }, [
     nftsLoading,
@@ -96,7 +97,12 @@ export default function NftsTab() {
   ]);
 
   useEffect(() => {
-    if (!nftsLoading && !nftsStillFetchingIndication) {
+    if (nftsLoading) {
+      return;
+    }
+    if (nftsStillFetchingIndication) {
+      endTrace({ name: TraceName.AccountOverviewNftsTabFMP });
+    } else {
       endTrace({ name: TraceName.AccountOverviewNftsTab });
     }
   }, [nftsLoading, nftsStillFetchingIndication]);
