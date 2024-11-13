@@ -4,16 +4,20 @@ import React, {
   useCallback,
   Fragment,
   useContext,
+  useRef,
 } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
 import { TransactionType } from '@metamask/transaction-controller';
 import {
   nonceSortedCompletedTransactionsSelector,
+  nonceSortedCompletedTransactionsSelectorAllChains,
   nonceSortedPendingTransactionsSelector,
+  nonceSortedPendingTransactionsSelectorAllChains,
 } from '../../../selectors/transactions';
 import {
   getCurrentChainId,
+  getPreferences,
   getSelectedAccount,
   ///: BEGIN:ONLY_INCLUDE_IF(build-main,build-beta,build-flask)
   getShouldHideZeroBalanceTokens,
@@ -28,13 +32,21 @@ import { isEqualCaseInsensitive } from '../../../../shared/modules/string-utils'
 import {
   Box,
   Button,
+  ButtonBase,
+  ButtonBaseSize,
   ButtonSize,
   ButtonVariant,
   IconName,
+  Popover,
+  PopoverPosition,
   Text,
 } from '../../component-library';
 import {
+  BackgroundColor,
+  BorderColor,
+  BorderStyle,
   Display,
+  JustifyContent,
   TextColor,
   TextVariant,
 } from '../../../helpers/constants/design-system';
@@ -53,6 +65,13 @@ import { getMultichainAccountUrl } from '../../../helpers/utils/multichain/block
 import { MetaMetricsContext } from '../../../contexts/metametrics';
 import { useMultichainSelector } from '../../../hooks/useMultichainSelector';
 import { getMultichainNetwork } from '../../../selectors/multichain';
+// eslint-disable-next-line import/no-restricted-paths
+import { getEnvironmentType } from '../../../../app/scripts/lib/util';
+import {
+  ENVIRONMENT_TYPE_NOTIFICATION,
+  ENVIRONMENT_TYPE_POPUP,
+} from '../../../../shared/constants/app';
+import NetworkFilter from '../assets/asset-list/network-filter/network-filter';
 
 const PAGE_INCREMENT = 10;
 
@@ -71,6 +90,18 @@ const getTransactionGroupRecipientAddressFilter = (
     return (
       isEqualCaseInsensitive(txParams?.to, recipientAddress) ||
       (txParams?.to === SWAPS_CHAINID_CONTRACT_ADDRESS_MAP[chainId] &&
+        txParams.data.match(recipientAddress.slice(2)))
+    );
+  };
+};
+
+const getTransactionGroupRecipientAddressFilterAllChain = (
+  recipientAddress,
+) => {
+  return ({ initialTransaction: { txParams } }) => {
+    return (
+      isEqualCaseInsensitive(txParams?.to, recipientAddress) ||
+      (txParams?.to === SWAPS_CHAINID_CONTRACT_ADDRESS_MAP &&
         txParams.data.match(recipientAddress.slice(2)))
     );
   };
@@ -100,6 +131,21 @@ const getFilteredTransactionGroups = (
   } else if (tokenAddress) {
     return transactionGroups.filter(
       getTransactionGroupRecipientAddressFilter(tokenAddress, chainId),
+    );
+  }
+  return transactionGroups;
+};
+
+const getFilteredTransactionGroupsAllChains = (
+  transactionGroups,
+  hideTokenTransactions,
+  tokenAddress,
+) => {
+  if (hideTokenTransactions) {
+    return transactionGroups.filter(tokenTransactionFilter);
+  } else if (tokenAddress) {
+    return transactionGroups.filter(
+      getTransactionGroupRecipientAddressFilterAllChain(tokenAddress),
     );
   }
   return transactionGroups;
@@ -141,13 +187,52 @@ export default function TransactionList({
 }) {
   const [limit, setLimit] = useState(PAGE_INCREMENT);
   const t = useI18nContext();
+  const { tokenNetworkFilter } = useSelector(getPreferences);
+  const allNetworksFilterShown = Object.keys(tokenNetworkFilter ?? {}).length;
 
-  const unfilteredPendingTransactions = useSelector(
+  const unfilteredPendingTransactionsCurrentChain = useSelector(
     nonceSortedPendingTransactionsSelector,
   );
-  const unfilteredCompletedTransactions = useSelector(
+
+  const unfilteredPendingTransactionsAllChains = useSelector(
+    nonceSortedPendingTransactionsSelectorAllChains,
+  );
+
+  const unfilteredPendingTransactions = useMemo(() => {
+    if (!process.env.FILTER_TOKENS_TOGGLE) {
+      return unfilteredPendingTransactionsCurrentChain;
+    }
+    return allNetworksFilterShown
+      ? unfilteredPendingTransactionsCurrentChain
+      : unfilteredPendingTransactionsAllChains;
+  }, [
+    allNetworksFilterShown,
+    unfilteredPendingTransactionsAllChains,
+    unfilteredPendingTransactionsCurrentChain,
+  ]);
+
+  const unfilteredCompletedTransactionsCurrentChain = useSelector(
     nonceSortedCompletedTransactionsSelector,
   );
+
+  const unfilteredCompletedTransactionsAllChains = useSelector(
+    nonceSortedCompletedTransactionsSelectorAllChains,
+  );
+
+  const unfilteredCompletedTransactions = useMemo(() => {
+    if (!process.env.FILTER_TOKENS_TOGGLE) {
+      return unfilteredCompletedTransactionsCurrentChain;
+    }
+
+    return allNetworksFilterShown
+      ? unfilteredCompletedTransactionsCurrentChain
+      : unfilteredCompletedTransactionsAllChains;
+  }, [
+    allNetworksFilterShown,
+    unfilteredCompletedTransactionsAllChains,
+    unfilteredCompletedTransactionsCurrentChain,
+  ]);
+
   const chainId = useSelector(getCurrentChainId);
   const selectedAccount = useSelector(getSelectedAccount);
 
@@ -159,10 +244,21 @@ export default function TransactionList({
     selectedAccount,
     shouldHideZeroBalanceTokens,
   );
+
   const balanceIsZero = Number(totalFiatBalance) === 0;
   const isBuyableChain = useSelector(getIsNativeTokenBuyable);
   const showRampsCard = isBuyableChain && balanceIsZero;
   ///: END:ONLY_INCLUDE_IF
+
+  const popoverRef = useRef(null);
+  const currentNetwork = useSelector(getCurrentChainId);
+  const [isNetworkFilterPopoverOpen, setIsNetworkFilterPopoverOpen] =
+    useState(false);
+
+  const windowType = getEnvironmentType();
+  const isFullScreen =
+    windowType !== ENVIRONMENT_TYPE_NOTIFICATION &&
+    windowType !== ENVIRONMENT_TYPE_POPUP;
 
   const renderDateStamp = (index, dateGroup) => {
     return index === 0 ? (
@@ -170,7 +266,7 @@ export default function TransactionList({
         paddingTop={4}
         paddingInline={4}
         variant={TextVariant.bodyMd}
-        color={TextColor.textDefault}
+        color={TextColor.textAlternative}
         key={dateGroup.dateMillis}
       >
         {dateGroup.date}
@@ -199,25 +295,27 @@ export default function TransactionList({
   const completedTransactions = useMemo(
     () =>
       groupTransactionsByDate(
-        getFilteredTransactionGroups(
+        getFilteredTransactionGroupsAllChains(
           unfilteredCompletedTransactions,
           hideTokenTransactions,
           tokenAddress,
-          chainId,
         ),
       ),
-    [
-      hideTokenTransactions,
-      tokenAddress,
-      unfilteredCompletedTransactions,
-      chainId,
-    ],
+    [hideTokenTransactions, tokenAddress, unfilteredCompletedTransactions],
   );
 
   const viewMore = useCallback(
     () => setLimit((prev) => prev + PAGE_INCREMENT),
     [],
   );
+
+  const toggleNetworkFilterPopover = () => {
+    setIsNetworkFilterPopoverOpen(!isNetworkFilterPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setIsNetworkFilterPopoverOpen(false);
+  };
 
   // Remove transactions within each date group that are incoming transactions
   // to a user that not the current one.
@@ -249,6 +347,58 @@ export default function TransactionList({
     );
 
     return dateGroup;
+  };
+
+  const renderFilterButton = () => {
+    return (
+      <Box
+        marginLeft={4}
+        marginRight={4}
+        justifyContent={
+          isFullScreen ? JustifyContent.flexStart : JustifyContent.spaceBetween
+        }
+        ref={popoverRef}
+      >
+        <ButtonBase
+          data-testid="sort-by-popover-toggle"
+          className="activity-list-control-bar__button"
+          onClick={toggleNetworkFilterPopover}
+          size={ButtonBaseSize.Sm}
+          endIconName={IconName.ArrowDown}
+          backgroundColor={
+            isNetworkFilterPopoverOpen
+              ? BackgroundColor.backgroundPressed
+              : BackgroundColor.backgroundDefault
+          }
+          borderColor={BorderColor.borderMuted}
+          borderStyle={BorderStyle.solid}
+          color={TextColor.textDefault}
+          marginRight={isFullScreen ? 2 : null}
+          ellipsis
+        >
+          {allNetworksFilterShown
+            ? currentNetwork?.nickname ?? t('currentNetwork')
+            : t('allNetworks')}
+        </ButtonBase>
+
+        <Popover
+          onClickOutside={closePopover}
+          isOpen={isNetworkFilterPopoverOpen}
+          position={PopoverPosition.BottomStart}
+          referenceElement={popoverRef.current}
+          matchWidth={!isFullScreen}
+          style={{
+            zIndex: 10,
+            display: 'flex',
+            flexDirection: 'column',
+            padding: 0,
+            minWidth: isFullScreen ? '325px' : '',
+          }}
+        >
+          <NetworkFilter handleClose={closePopover} />
+        </Popover>
+      </Box>
+    );
   };
 
   // Remove date groups with no transaction groups
@@ -300,6 +450,7 @@ export default function TransactionList({
         ///: END:ONLY_INCLUDE_IF
       }
       <Box className="transaction-list" {...boxProps}>
+        {process.env.FILTER_TOKENS_TOGGLE && renderFilterButton()}
         <Box className="transaction-list__transactions">
           {pendingTransactions.length > 0 && (
             <Box className="transaction-list__pending-transactions">
@@ -328,6 +479,7 @@ export default function TransactionList({
                         <TransactionListItem
                           isEarliestNonce={index === 0}
                           transactionGroup={transactionGroup}
+                          chainId={transactionGroup.initialTransaction.chainId}
                         />
                       </Fragment>
                     );
@@ -336,6 +488,7 @@ export default function TransactionList({
               })}
             </Box>
           )}
+
           <Box className="transaction-list__completed-transactions">
             {completedTransactions.length > 0 ? (
               completedTransactions
@@ -366,6 +519,9 @@ export default function TransactionList({
                           ) : (
                             <TransactionListItem
                               transactionGroup={transactionGroup}
+                              chainId={
+                                transactionGroup.initialTransaction.chainId
+                              }
                             />
                           )}
                         </Fragment>

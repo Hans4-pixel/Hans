@@ -5,7 +5,7 @@ import classnames from 'classnames';
 import { useHistory } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { TransactionStatus } from '@metamask/transaction-controller';
+import { CHAIN_IDS, TransactionStatus } from '@metamask/transaction-controller';
 import { useTransactionDisplayData } from '../../../hooks/useTransactionDisplayData';
 import { useI18nContext } from '../../../hooks/useI18nContext';
 
@@ -49,11 +49,7 @@ import {
   TransactionModalContextProvider,
   useTransactionModalContext,
 } from '../../../contexts/transaction-modal';
-import {
-  checkNetworkAndAccountSupports1559,
-  getCurrentNetwork,
-  getTestNetworkBackgroundColor,
-} from '../../../selectors';
+import { checkNetworkAndAccountSupports1559 } from '../../../selectors';
 import { isLegacyTransaction } from '../../../helpers/utils/transactions.util';
 import { formatDateWithYearContext } from '../../../helpers/utils/util';
 import Button from '../../ui/button';
@@ -66,11 +62,16 @@ import { MetaMetricsContext } from '../../../contexts/metametrics';
 import { ActivityListItem } from '../../multichain';
 import { abortTransactionSigning } from '../../../store/actions';
 import { getIsSmartTransaction } from '../../../../shared/modules/selectors';
+import {
+  CHAIN_ID_TO_NETWORK_IMAGE_URL_MAP,
+  NETWORK_TO_NAME_MAP,
+} from '../../../../shared/constants/network';
 
 function TransactionListItemInner({
   transactionGroup,
   setEditGasMode,
   isEarliestNonce = false,
+  chainId,
 }) {
   const t = useI18nContext();
   const history = useHistory();
@@ -81,9 +82,19 @@ function TransactionListItemInner({
   const [showRetryEditGasPopover, setShowRetryEditGasPopover] = useState(false);
   const { supportsEIP1559 } = useGasFeeContext();
   const { openModal } = useTransactionModalContext();
-  const testNetworkBackgroundColor = useSelector(getTestNetworkBackgroundColor);
   const isSmartTransaction = useSelector(getIsSmartTransaction);
   const dispatch = useDispatch();
+
+  const getTestNetworkBackgroundColor = (networkId) => {
+    switch (true) {
+      case networkId === CHAIN_IDS.GOERLI:
+        return BackgroundColor.goerli;
+      case networkId === CHAIN_IDS.SEPOLIA:
+        return BackgroundColor.sepolia;
+      default:
+        return undefined;
+    }
+  };
 
   const {
     initialTransaction: { id },
@@ -159,6 +170,7 @@ function TransactionListItemInner({
     isPending,
     senderAddress,
   } = useTransactionDisplayData(transactionGroup);
+
   const date = formatDateWithYearContext(
     transactionGroup.primaryTransaction.time,
     'MMM d, y',
@@ -259,7 +271,6 @@ function TransactionListItemInner({
     isCustodian,
     ///: END:ONLY_INCLUDE_IF
   ]);
-  const currentChain = useSelector(getCurrentNetwork);
   let showCancelButton =
     !hasCancelled && isPending && !isUnapproved && !isSubmitting;
 
@@ -316,11 +327,11 @@ function TransactionListItemInner({
                   className="activity-tx__network-badge"
                   data-testid="activity-tx-network-badge"
                   size={AvatarNetworkSize.Xs}
-                  name={currentChain?.nickname}
-                  src={currentChain?.rpcPrefs?.imageUrl}
+                  name={NETWORK_TO_NAME_MAP[chainId]}
+                  src={CHAIN_ID_TO_NETWORK_IMAGE_URL_MAP[chainId]}
                   borderWidth={1}
                   borderColor={BackgroundColor.backgroundDefault}
-                  backgroundColor={testNetworkBackgroundColor}
+                  backgroundColor={getTestNetworkBackgroundColor(chainId)}
                 />
               }
             >
@@ -441,6 +452,7 @@ function TransactionListItemInner({
               ///: END:ONLY_INCLUDE_IF
             />
           )}
+          chainId={transactionGroup.initialTransaction.chainId}
         />
       )}
       {!supportsEIP1559 && showRetryEditGasPopover && (
@@ -465,6 +477,7 @@ TransactionListItemInner.propTypes = {
   transactionGroup: PropTypes.object.isRequired,
   isEarliestNonce: PropTypes.bool,
   setEditGasMode: PropTypes.func,
+  chainId: PropTypes.string,
 };
 
 const TransactionListItem = (props) => {
