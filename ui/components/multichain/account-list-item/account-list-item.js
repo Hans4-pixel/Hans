@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-
 import { useSelector } from 'react-redux';
+import { useInViewport } from 'react-in-viewport';
 import { useI18nContext } from '../../../hooks/useI18nContext';
 import { shortenAddress } from '../../../helpers/utils/util';
 
@@ -108,8 +108,22 @@ const AccountListItem = ({
   const showFiatInTestnets = useSelector(getShowFiatInTestnets);
   const showFiat =
     shouldShowFiat && (isMainnet || (isTestnet && showFiatInTestnets));
-  const accountTotalFiatBalances =
-    useMultichainAccountTotalFiatBalance(account);
+
+  const itemRef = useRef(null);
+  /*
+  const isItemInViewport = useInViewport(itemRef);
+
+  console.log(
+    `${account.metadata.name} in view? `,
+    isItemInViewport.inViewport,
+  );
+  */
+  const accountTotalFiatBalances = /*useMultichainAccountTotalFiatBalance(
+    account,
+    true,
+    !isItemInViewport.inViewport,
+    account.metadata.name,
+  )*/ {orderedTokenList: [], totalBalance: ''};
   const mappedOrderedTokenList = accountTotalFiatBalances.orderedTokenList.map(
     (item) => ({
       avatarValue: item.iconUrl,
@@ -128,7 +142,6 @@ const AccountListItem = ({
 
   // If this is the selected item in the Account menu,
   // scroll the item into view
-  const itemRef = useRef(null);
   useEffect(() => {
     if (selected && shouldScrollToWhenSelected) {
       itemRef.current?.scrollIntoView?.();
@@ -150,6 +163,8 @@ const AccountListItem = ({
   const isConnected =
     currentTabOrigin && currentTabIsConnectedToSelectedAddress;
   const isSingleAccount = accountsCount === 1;
+
+  return <div>{account.metadata.name}</div>;
 
   return (
     <Box

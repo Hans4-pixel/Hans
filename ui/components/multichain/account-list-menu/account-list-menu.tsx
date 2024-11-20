@@ -344,7 +344,7 @@ export const AccountListMenu = ({
     fuse.setCollection(filteredAccounts);
     searchResults = fuse.search(searchQuery);
   }
-  searchResults = mergeAccounts(searchResults, filteredAccounts);
+  searchResults = useMemo(() => mergeAccounts(searchResults, filteredAccounts), [searchResults, filteredAccounts]);
 
   const title = useMemo(
     () => getActionTitle(t as (text: string) => string, actionMode),
@@ -387,6 +387,8 @@ export const AccountListMenu = ({
     },
     [dispatch, onClose, trackEvent],
   );
+
+  console.log('AccountListMenu is rendering');
 
   return (
     <Modal isOpen onClose={onClose}>
