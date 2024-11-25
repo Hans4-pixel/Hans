@@ -26,7 +26,6 @@ import { updateTransactionGasFees } from '../../store/actions';
 import { setCustomGasLimit, setCustomGasPrice } from '../gas/gas.duck';
 
 const initialState = {
-  isInitialized: false,
   isUnlocked: false,
   internalAccounts: { accounts: {}, selectedAccount: '' },
   transactions: [],
