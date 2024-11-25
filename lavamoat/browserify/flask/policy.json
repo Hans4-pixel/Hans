@@ -2815,7 +2815,8 @@
         "clearTimeout": true,
         "document.getElementById": true,
         "fetch.bind": true,
-        "setTimeout": true
+        "setTimeout": true,
+        "navigator": true
       },
       "packages": {
         "@metamask/base-controller": true,
