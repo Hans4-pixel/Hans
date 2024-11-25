@@ -36,6 +36,9 @@ class HomePage {
     css: '.transaction-status-label--failed',
   };
 
+  private readonly refreshTokenListButton =
+    '[data-testid="refresh-list-button"]';
+
   private readonly popoverBackground = '.popover-bg';
 
   private readonly sendButton = '[data-testid="eth-overview-send"]';
@@ -85,6 +88,10 @@ class HomePage {
     console.log('Home page is loaded');
   }
 
+  async clickNFTIconOnActivityList() {
+    await this.driver.clickElement(this.nftIconOnActivityList);
+  }
+
   async closeUseNetworkNotificationModal(): Promise<void> {
     // We need to use clickElementSafe + assertElementNotPresent as sometimes the network dialog doesn't appear, as per this issue (#25788)
     // TODO: change the 2 actions for clickElementAndWaitToDisappear, once the issue is fixed
@@ -107,8 +114,9 @@ class HomePage {
     await this.driver.clickElement(this.nftTab);
   }
 
-  async clickNFTIconOnActivityList() {
-    await this.driver.clickElement(this.nftIconOnActivityList);
+  async refreshTokenList(): Promise<void> {
+    console.log('Refresh token list on homepage');
+    await this.driver.clickElement(this.refreshTokenListButton);
   }
 
   async startSendFlow(): Promise<void> {
