@@ -339,9 +339,8 @@ class HomePage {
     const transactionAmounts = await this.driver.findElements(
       this.transactionAmountsInActivity,
     );
-    const transactionAmountsText = await transactionAmounts[
-      expectedNumber - 1
-    ].getText();
+    const transactionAmountsText =
+      await transactionAmounts[expectedNumber - 1].getText();
     assert.equal(
       transactionAmountsText,
       expectedAmount,

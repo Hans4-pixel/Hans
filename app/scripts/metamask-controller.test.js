@@ -640,12 +640,10 @@ describe('MetaMaskController', () => {
       it('can only create new vault on keyringController once', async () => {
         const password = 'a-fake-password';
 
-        const vault1 = await metamaskController.createNewVaultAndKeychain(
-          password,
-        );
-        const vault2 = await metamaskController.createNewVaultAndKeychain(
-          password,
-        );
+        const vault1 =
+          await metamaskController.createNewVaultAndKeychain(password);
+        const vault2 =
+          await metamaskController.createNewVaultAndKeychain(password);
 
         expect(vault1).toStrictEqual(vault2);
       });
@@ -886,9 +884,8 @@ describe('MetaMaskController', () => {
               it('should be unlocked by default', async () => {
                 await metamaskController.connectHardware(device, 0);
 
-                const status = await metamaskController.checkHardwareStatus(
-                  device,
-                );
+                const status =
+                  await metamaskController.checkHardwareStatus(device);
 
                 expect(status).toStrictEqual(true);
               });
@@ -2316,9 +2313,8 @@ describe('MetaMaskController', () => {
           )
           .mockReturnValue(tokenData);
 
-        const tokenSymbol = await metamaskController.getTokenSymbol(
-          '0xNotInTokenList',
-        );
+        const tokenSymbol =
+          await metamaskController.getTokenSymbol('0xNotInTokenList');
 
         expect(tokenSymbol).toStrictEqual(tokenData.symbol);
       });
@@ -2354,9 +2350,8 @@ describe('MetaMaskController', () => {
             throw new Error('error');
           });
 
-        const tokenSymbol = await metamaskController.getTokenSymbol(
-          '0xNotInTokenList',
-        );
+        const tokenSymbol =
+          await metamaskController.getTokenSymbol('0xNotInTokenList');
 
         expect(tokenSymbol).toStrictEqual(null);
       });

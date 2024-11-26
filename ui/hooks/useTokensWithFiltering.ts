@@ -48,7 +48,7 @@ export const useTokensWithFiltering = (
     useSelector(getSelectedInternalAccountWithBalance);
 
   const allDetectedTokensForChainAndAddress = chainId
-    ? allDetectedTokens?.[chainId]?.[selectedAddress] ?? []
+    ? (allDetectedTokens?.[chainId]?.[selectedAddress] ?? [])
     : [];
 
   const shouldHideZeroBalanceTokens = useSelector(

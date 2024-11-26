@@ -184,7 +184,7 @@ const AssetListControlBar = ({ showTokensLinks }: AssetListControlBarProps) => {
             ellipsis
           >
             {allNetworksFilterShown
-              ? currentNetwork?.nickname ?? t('currentNetwork')
+              ? (currentNetwork?.nickname ?? t('currentNetwork'))
               : t('allNetworks')}
           </ButtonBase>
         )}
