@@ -2145,6 +2145,7 @@ export default class MetamaskController extends EventEmitter {
     this.swapsController = new SwapsController(
       {
         messenger: swapsControllerMessenger,
+        provider: this.provider,
         // TODO: Remove once TransactionController exports this action type
         getBufferedGasLimit: async (txMeta, multiplier) => {
           const { gas: gasLimit, simulationFails } =
