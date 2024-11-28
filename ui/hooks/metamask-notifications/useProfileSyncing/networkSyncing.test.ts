@@ -1,33 +1,30 @@
 import { renderHookWithProviderTyped } from '../../../../test/lib/render-helpers';
 import * as actions from '../../../store/actions';
 import {
-  useDeleteAccountSyncingDataFromUserStorage,
-  useSyncAccounts,
-} from './accountSyncing';
+  useDeleteNetworkSyncingDataFromUserStorage,
+  useSyncNetworks,
+} from './networkSyncing';
 
-describe('useDeleteAccountSyncingDataFromUserStorage()', () => {
+describe('useDeleteNetworkSyncingDataFromUserStorage()', () => {
   it('should dispatch account sync data deletion', async () => {
     const mockDeleteAccountSyncAction = jest.spyOn(
       actions,
-      'deleteAccountSyncingDataFromUserStorage',
+      'deleteNetworkSyncingDataFromUserStorage',
     );
 
     const { result } = renderHookWithProviderTyped(
-      () => useDeleteAccountSyncingDataFromUserStorage(),
+      () => useDeleteNetworkSyncingDataFromUserStorage(),
       {},
     );
 
-    await result.current.dispatchDeleteAccountData();
+    await result.current.dispatchDeleteNetworkData();
     expect(mockDeleteAccountSyncAction).toHaveBeenCalled();
   });
 });
 
 describe('useSyncAccounts', () => {
   const arrangeMocks = () => {
-    const mockSyncAccountsAction = jest.spyOn(
-      actions,
-      'syncInternalAccountsWithUserStorage',
-    );
+    const mockSyncAccountsAction = jest.spyOn(actions, 'syncNetworks');
 
     return {
       mockSyncAccountsAction,
@@ -36,7 +33,7 @@ describe('useSyncAccounts', () => {
 
   it('should dispatch sync accounts when called', async () => {
     const mocks = arrangeMocks();
-    const hook = renderHookWithProviderTyped(() => useSyncAccounts(), {});
+    const hook = renderHookWithProviderTyped(() => useSyncNetworks(), {});
     await hook.result.current();
     expect(mocks.mockSyncAccountsAction).toHaveBeenCalled();
   });
