@@ -99,6 +99,13 @@ aliases:
         circleci step halt
       fi
 
+commands:
+  foundry-install:
+    steps:
+        - run:
+            name: Install Foundry package for Anvil Testing Dependency
+            command: yarn foundryup
+
 workflows:
   test_and_release:
     when:
@@ -1085,6 +1092,7 @@ jobs:
       - run:
           name: Move test build to dist
           command: mv ./dist-test-webpack ./dist
+      - foundry-install
       - run:
           name: test:e2e:chrome:webpack
           command: .circleci/scripts/test-run-e2e.sh yarn test:e2e:chrome:webpack
@@ -1108,6 +1116,7 @@ jobs:
       - run:
           name: Move test zips to builds
           command: mv ./builds-test ./builds
+      - foundry-install
       - gh/install
       - run:
           name: test:api-specs
@@ -1140,6 +1149,7 @@ jobs:
       - run:
           name: Move test zips to builds
           command: mv ./builds-test ./builds
+      - foundry-install
       - run:
           name: test:e2e:chrome
           command: .circleci/scripts/test-run-e2e.sh yarn test:e2e:chrome
@@ -1164,6 +1174,7 @@ jobs:
       - run:
           name: Move test zips to builds
           command: mv ./builds-test ./builds
+      - foundry-install
       - run:
           name: test:e2e:chrome:rpc
           command: .circleci/scripts/test-run-e2e.sh yarn test:e2e:chrome:rpc
@@ -1188,6 +1199,7 @@ jobs:
       - run:
           name: Move test zips to builds
           command: mv ./builds-test ./builds
+      - foundry-install
       - run:
           name: test:e2e:chrome:multi-provider
           command: .circleci/scripts/test-run-e2e.sh yarn test:e2e:chrome:multi-provider
@@ -1212,6 +1224,7 @@ jobs:
       - run:
           name: Move test zips to builds
           command: mv ./builds-test-mmi ./builds
+      - foundry-install
       - run:
           name: test:e2e:chrome:rpc
           command: .circleci/scripts/test-run-e2e.sh yarn test:e2e:chrome:rpc --build-type=mmi
@@ -1229,6 +1242,7 @@ jobs:
       - run: sudo corepack enable
       - attach_workspace:
           at: .
+      - foundry-install
       - run:
           name: test:e2e:single
           command: .circleci/scripts/test-run-e2e.sh yarn test:e2e:single test/e2e/vault-decryption-chrome.spec.ts --browser chrome
@@ -1253,6 +1267,7 @@ jobs:
       - run:
           name: Move test zips to builds
           command: mv ./builds-test-flask-mv2 ./builds
+      - foundry-install
       - run:
           name: test:e2e:firefox:flask
           command: .circleci/scripts/test-run-e2e.sh yarn test:e2e:firefox:flask
@@ -1277,6 +1292,7 @@ jobs:
       - run:
           name: Move test zips to builds
           command: mv ./builds-test-flask ./builds
+      - foundry-install
       - run:
           name: test:e2e:chrome:flask
           command: .circleci/scripts/test-run-e2e.sh yarn test:e2e:chrome:flask
@@ -1302,6 +1318,7 @@ jobs:
       - run:
           name: Move test zips to builds
           command: mv ./builds-test-mmi ./builds
+      - foundry-install
       - run:
           name: test:e2e:chrome:mmi
           command: .circleci/scripts/test-run-e2e.sh yarn test:e2e:chrome:mmi --build-type=mmi
@@ -1324,6 +1341,7 @@ jobs:
       - run:
           name: Move test build to dist
           command: mv ./dist-test-mmi-playwright ./dist
+      - foundry-install
       - run:
           name: Install chromium
           command: yarn playwright install chromium
@@ -1364,6 +1382,7 @@ jobs:
       - run:
           name: Install chromium
           command: yarn playwright install chromium
+      - foundry-install
       - run:
           name: test:e2e:chrome:swap
           command: |
@@ -1397,6 +1416,7 @@ jobs:
       - run:
           name: Move test zips to builds
           command: mv ./builds-test-mv2 ./builds
+      - foundry-install
       - run:
           name: test:e2e:firefox
           command: .circleci/scripts/test-run-e2e.sh yarn test:e2e:firefox
@@ -1468,6 +1488,7 @@ jobs:
       - run:
           name: Move test zips to builds
           command: mv ./builds-test ./builds
+      - foundry-install
       - run:
           name: Run page load benchmark
           command: |

@@ -1,5 +1,6 @@
 import { strict as assert } from 'assert';
 import { Driver } from '../../webdriver/driver';
+import { Anvil } from '../../seeder/anvil';
 import { Ganache } from '../../seeder/ganache';
 import { getCleanAppState } from '../../helpers';
 import HeaderNavbar from './header-navbar';
@@ -361,7 +362,7 @@ class HomePage {
   }
 
   async check_localBlockchainBalanceIsDisplayed(
-    localBlockchainServer?: Ganache,
+    localBlockchainServer?: Ganache | Anvil,
     address = null,
   ): Promise<void> {
     let expectedBalance: string;

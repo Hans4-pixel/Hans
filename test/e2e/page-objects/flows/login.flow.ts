@@ -1,6 +1,7 @@
 import LoginPage from '../pages/login-page';
 import HomePage from '../pages/homepage';
 import { Driver } from '../../webdriver/driver';
+import { Anvil } from '../../seeder/anvil';
 import { Ganache } from '../../seeder/ganache';
 
 /**
@@ -29,7 +30,7 @@ export const loginWithoutBalanceValidation = async (
  */
 export const loginWithBalanceValidation = async (
   driver: Driver,
-  localBlockchainServer?: Ganache,
+  localBlockchainServer?: Ganache | Anvil,
   password?: string,
 ) => {
   await loginWithoutBalanceValidation(driver, password);

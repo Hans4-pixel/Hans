@@ -1,5 +1,4 @@
 const {
-  defaultGanacheOptions,
   withFixtures,
   logInWithBalanceValidation,
   openActionMenuAndStartSendFlow,
@@ -18,11 +17,11 @@ describe('Send ETH to a 40 character hexadecimal address', function () {
         fixtures: new FixtureBuilder()
           .withPreferencesControllerPetnamesDisabled()
           .build(),
-        ganacheOptions: defaultGanacheOptions,
         title: this.test.fullTitle(),
+        useAnvil: true,
       },
-      async ({ driver, ganacheServer }) => {
-        await logInWithBalanceValidation(driver, ganacheServer);
+      async ({ driver, anvilServer }) => {
+        await logInWithBalanceValidation(driver, anvilServer);
 
         // Send ETH
         await openActionMenuAndStartSendFlow(driver);
@@ -63,11 +62,11 @@ describe('Send ETH to a 40 character hexadecimal address', function () {
         fixtures: new FixtureBuilder()
           .withPreferencesControllerPetnamesDisabled()
           .build(),
-        ganacheOptions: defaultGanacheOptions,
         title: this.test.fullTitle(),
+        useAnvil: true,
       },
-      async ({ driver, ganacheServer }) => {
-        await logInWithBalanceValidation(driver, ganacheServer);
+      async ({ driver, anvilServer }) => {
+        await logInWithBalanceValidation(driver, anvilServer);
 
         // Send ETH
         await openActionMenuAndStartSendFlow(driver);
@@ -114,19 +113,19 @@ describe('Send ERC20 to a 40 character hexadecimal address', function () {
           .withPreferencesControllerPetnamesDisabled()
           .withTokensControllerERC20()
           .build(),
-        ganacheOptions: defaultGanacheOptions,
         smartContract,
         title: this.test.fullTitle(),
+        useAnvil: true,
       },
-      async ({ driver, ganacheServer }) => {
-        await logInWithBalanceValidation(driver, ganacheServer);
-
+      async ({ driver, anvilServer }) => {
+        await logInWithBalanceValidation(driver, anvilServer);
         await tempToggleSettingRedesignedTransactionConfirmations(driver);
 
         // Send TST
         await driver.clickElement(
           '[data-testid="account-overview__asset-tab"]',
         );
+
         await driver.clickElement(
           '[data-testid="multichain-token-list-button"]',
         );
@@ -178,13 +177,12 @@ describe('Send ERC20 to a 40 character hexadecimal address', function () {
           .withPreferencesControllerPetnamesDisabled()
           .withTokensControllerERC20()
           .build(),
-        ganacheOptions: defaultGanacheOptions,
         smartContract,
         title: this.test.fullTitle(),
+        useAnvil: true,
       },
-      async ({ driver, ganacheServer }) => {
-        await logInWithBalanceValidation(driver, ganacheServer);
-
+      async ({ driver, anvilServer }) => {
+        await logInWithBalanceValidation(driver, anvilServer);
         await tempToggleSettingRedesignedTransactionConfirmations(driver);
 
         // Send TST

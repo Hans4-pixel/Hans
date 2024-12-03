@@ -1,9 +1,8 @@
 import { Suite } from 'mocha';
 import { Driver } from '../../webdriver/driver';
-import { Ganache } from '../../seeder/ganache';
+import { Anvil } from '../../seeder/anvil';
 import {
   withFixtures,
-  defaultGanacheOptions,
   tempToggleSettingRedesignedTransactionConfirmations,
 } from '../../helpers';
 import FixtureBuilder from '../../fixture-builder';
@@ -16,17 +15,17 @@ describe('Simple send eth', function (this: Suite) {
     await withFixtures(
       {
         fixtures: new FixtureBuilder().build(),
-        ganacheOptions: defaultGanacheOptions,
         title: this.test?.fullTitle(),
+        useAnvil: true,
       },
       async ({
         driver,
-        ganacheServer,
+        anvilServer,
       }: {
         driver: Driver;
-        ganacheServer?: Ganache;
+        anvilServer?: Anvil;
       }) => {
-        await loginWithBalanceValidation(driver, ganacheServer);
+        await loginWithBalanceValidation(driver, anvilServer);
 
         await tempToggleSettingRedesignedTransactionConfirmations(driver);
 
