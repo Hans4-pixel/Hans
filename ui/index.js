@@ -98,12 +98,12 @@ export async function setupInitialStore(
   activeTab,
 ) {
   // parse opts
-  if (!metamaskState.featureFlags) {
-    metamaskState.featureFlags = {};
+  if (!metamaskState.PreferencesController.featureFlags) {
+    metamaskState.PreferencesController.featureFlags = {};
   }
 
   const { currentLocaleMessages, enLocaleMessages } = await setupLocale(
-    metamaskState.currentLocale,
+    metamaskState.PreferencesController.currentLocale,
   );
 
   if (metamaskState.textDirection === 'rtl') {
@@ -120,7 +120,7 @@ export async function setupInitialStore(
     appState: {},
 
     localeMessages: {
-      currentLocale: metamaskState.currentLocale,
+      currentLocale: metamaskState.PreferencesController.currentLocale,
       current: currentLocaleMessages,
       en: enLocaleMessages,
     },
@@ -161,10 +161,10 @@ export async function setupInitialStore(
   // if unconfirmed txs, start on txConf page
   const unapprovedTxsAll = txHelper(
     unapprovedTxs,
-    metamaskState.unapprovedPersonalMsgs,
-    metamaskState.unapprovedDecryptMsgs,
-    metamaskState.unapprovedEncryptionPublicKeyMsgs,
-    metamaskState.unapprovedTypedMessages,
+    metamaskState.SignatureController.PersonalMsgs,
+    metamaskState.DecryptMessageController.unapprovedDecryptMsgs,
+    metamaskState.EncryptionPublicKeyController.EncryptionPublicKeyMsgs,
+    metamaskState.SignatureController.TypedMessages,
     metamaskState.networkId,
     getCurrentChainId({ metamask: metamaskState }),
   );

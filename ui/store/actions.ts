@@ -723,7 +723,9 @@ export function decryptMsgInline(
     }
 
     const newState = await forceUpdateMetamaskState(dispatch);
-    return newState.unapprovedDecryptMsgs[decryptedMsgData.metamaskId];
+    return newState.DecryptMessageController.unapprovedDecryptMsgs[
+      decryptedMsgData.metamaskId
+    ];
   };
 }
 
@@ -1277,7 +1279,8 @@ export function deleteExpiredNotifications(): ThunkAction<
 > {
   return async (dispatch, getState) => {
     const state = getState();
-    const notifications = state.metamask.metamaskNotificationsList;
+    const notifications =
+      state.metamask.NotificationServicesController.metamaskNotificationsList;
 
     const notificationIdsToDelete = notifications
       .filter((notification) => {
@@ -1570,9 +1573,13 @@ export function updateMetamaskState(
     }
 
     const newAddressBook =
-      newState.addressBook?.[newProviderConfig?.chainId] ?? {};
+      newState.AddressBookController.addressBook?.[
+        newProviderConfig?.chainId
+      ] ?? {};
     const oldAddressBook =
-      currentState.addressBook?.[providerConfig?.chainId] ?? {};
+      currentState.AddressBookController.addressBook?.[
+        providerConfig?.chainId
+      ] ?? {};
     // TODO: Replace `any` with type
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newAccounts: { [address: string]: Record<string, any> } =
@@ -1612,13 +1619,16 @@ export function updateMetamaskState(
 
     // track when gasFeeEstimates change
     if (
-      isEqual(currentState.gasFeeEstimates, newState.gasFeeEstimates) === false
+      isEqual(
+        currentState.GasFeeController.gasFeeEstimates,
+        newState.GasFeeController.gasFeeEstimates,
+      ) === false
     ) {
       dispatch({
         type: actionConstants.GAS_FEE_ESTIMATES_UPDATED,
         payload: {
-          gasFeeEstimates: newState.gasFeeEstimates,
-          gasEstimateType: newState.gasEstimateType,
+          gasFeeEstimates: newState.GasFeeController.gasFeeEstimates,
+          gasEstimateType: newState.GasFeeController.gasEstimateType,
         },
       });
     }

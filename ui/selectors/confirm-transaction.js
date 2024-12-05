@@ -46,13 +46,13 @@ import {
 
 const unapprovedTxsSelector = (state) => getUnapprovedTransactions(state);
 const unapprovedPersonalMsgsSelector = (state) =>
-  state.metamask.unapprovedPersonalMsgs;
+  state.metamask.SignatureController.PersonalMsgs;
 const unapprovedDecryptMsgsSelector = (state) =>
-  state.metamask.unapprovedDecryptMsgs;
+  state.metamask.DecryptMessageController.unapprovedDecryptMsgs;
 const unapprovedEncryptionPublicKeyMsgsSelector = (state) =>
-  state.metamask.unapprovedEncryptionPublicKeyMsgs;
+  state.metamask.EncryptionPublicKeyController.EncryptionPublicKeyMsgs;
 const unapprovedTypedMessagesSelector = (state) =>
-  state.metamask.unapprovedTypedMessages;
+  state.metamask.SignatureController.TypedMessages;
 
 export const unconfirmedTransactionsListSelector = createSelector(
   unapprovedTxsSelector,
@@ -109,10 +109,10 @@ export const unconfirmedTransactionsHashSelector = createSelector(
 
     return {
       ...filteredUnapprovedTxs,
-      ...unapprovedPersonalMsgs,
-      ...unapprovedDecryptMsgs,
-      ...unapprovedEncryptionPublicKeyMsgs,
-      ...unapprovedTypedMessages,
+      ...SignatureController.PersonalMsgs,
+      ...DecryptMessageController.unapprovedDecryptMsgs,
+      ...EncryptionPublicKeyController.EncryptionPublicKeyMsgs,
+      ...SignatureController.TypedMessages,
     };
   },
 );
@@ -129,19 +129,21 @@ export const unconfirmedMessagesHashSelector = createSelector(
     unapprovedTypedMessages = {},
   ) => {
     return {
-      ...unapprovedPersonalMsgs,
-      ...unapprovedDecryptMsgs,
-      ...unapprovedEncryptionPublicKeyMsgs,
-      ...unapprovedTypedMessages,
+      ...SignatureController.PersonalMsgs,
+      ...DecryptMessageController.unapprovedDecryptMsgs,
+      ...EncryptionPublicKeyController.EncryptionPublicKeyMsgs,
+      ...SignatureController.TypedMessages,
     };
   },
 );
 export const use4ByteResolutionSelector = (state) =>
-  state.metamask.use4ByteResolution;
+  state.metamask.PreferencesController.use4ByteResolution;
 export const currentCurrencySelector = (state) =>
-  state.metamask.currentCurrency;
+  state.metamask.CurrencyController.currentCurrency;
 export const conversionRateSelector = (state) =>
-  state.metamask.currencyRates[getProviderConfig(state).ticker]?.conversionRate;
+  state.metamask.CurrencyController.currencyRates[
+    getProviderConfig(state).ticker
+  ]?.conversionRate;
 export const txDataSelector = (state) => state.confirmTransaction.txData;
 const tokenDataSelector = (state) => state.confirmTransaction.tokenData;
 const tokenPropsSelector = (state) => state.confirmTransaction.tokenProps;

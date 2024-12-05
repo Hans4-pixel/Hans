@@ -28,41 +28,47 @@ const getMetaMaskStateWithUnapprovedApproveTransaction = (
 ) => {
   return {
     ...mockMetaMaskState,
-    preferences: {
-      ...mockMetaMaskState.preferences,
-      redesignedConfirmationsEnabled: true,
-    },
-    pendingApprovals: {
-      [pendingTransactionId]: {
-        id: pendingTransactionId,
-        origin: 'origin',
-        time: pendingTransactionTime,
-        type: ApprovalType.Transaction,
-        requestData: {
-          txId: pendingTransactionId,
+    PreferencesController: {
+      preferences: {
+        ...mockMetaMaskState.PreferencesController.preferences,
+        redesignedConfirmationsEnabled: true,
+      },
+      knownMethodData: {
+        '0x3b4b1381': {
+          name: 'Mint NFTs',
+          params: [
+            {
+              type: 'uint256',
+            },
+          ],
         },
-        requestState: null,
-        expectsResult: false,
       },
     },
-    pendingApprovalCount: 1,
-    knownMethodData: {
-      '0x3b4b1381': {
-        name: 'Mint NFTs',
-        params: [
-          {
-            type: 'uint256',
+    ApprovalController: {
+      pendingApprovals: {
+        [pendingTransactionId]: {
+          id: pendingTransactionId,
+          origin: 'origin',
+          time: pendingTransactionTime,
+          type: ApprovalType.Transaction,
+          requestData: {
+            txId: pendingTransactionId,
           },
-        ],
+          requestState: null,
+          expectsResult: false,
+        },
       },
+      pendingApprovalCount: 1,
     },
-    transactions: [
-      getUnapprovedApproveTransaction(
-        accountAddress,
-        pendingTransactionId,
-        pendingTransactionTime,
-      ),
-    ],
+    TxController: {
+      transactions: [
+        getUnapprovedApproveTransaction(
+          accountAddress,
+          pendingTransactionId,
+          pendingTransactionTime,
+        ),
+      ],
+    },
   };
 };
 
@@ -105,9 +111,9 @@ describe('Contract Interaction Confirmation Alerts', () => {
 
   it('displays the alert when network is busy', async () => {
     const account =
-      mockMetaMaskState.internalAccounts.accounts[
-        mockMetaMaskState.internalAccounts
-          .selectedAccount as keyof typeof mockMetaMaskState.internalAccounts.accounts
+      mockMetaMaskState.AccountsController.internalAccounts.accounts[
+        mockMetaMaskState.AccountsController.internalAccounts
+          .selectedAccount as keyof typeof mockMetaMaskState.AccountsController.internalAccounts.accounts
       ];
 
     const mockedMetaMaskState =
@@ -153,16 +159,16 @@ describe('Contract Interaction Confirmation Alerts', () => {
 
   it('displays the alert when gas estimate fails', async () => {
     const account =
-      mockMetaMaskState.internalAccounts.accounts[
-        mockMetaMaskState.internalAccounts
-          .selectedAccount as keyof typeof mockMetaMaskState.internalAccounts.accounts
+      mockMetaMaskState.AccountsController.internalAccounts.accounts[
+        mockMetaMaskState.AccountsController.internalAccounts
+          .selectedAccount as keyof typeof mockMetaMaskState.AccountsController.internalAccounts.accounts
       ];
 
     const mockedMetaMaskState =
       getMetaMaskStateWithUnapprovedApproveTransaction(account.address);
 
     const transactions = {
-      ...mockedMetaMaskState.transactions[0],
+      ...mockedMetaMaskState.TxController.transactions[0],
       simulationFails: {
         reason: 'Internal JSON-RPC error.',
         debug: {
@@ -208,14 +214,14 @@ describe('Contract Interaction Confirmation Alerts', () => {
 
   it('displays the alert for insufficient gas', async () => {
     const account =
-      mockMetaMaskState.internalAccounts.accounts[
-        mockMetaMaskState.internalAccounts
-          .selectedAccount as keyof typeof mockMetaMaskState.internalAccounts.accounts
+      mockMetaMaskState.AccountsController.internalAccounts.accounts[
+        mockMetaMaskState.AccountsController.internalAccounts
+          .selectedAccount as keyof typeof mockMetaMaskState.AccountsController.internalAccounts.accounts
       ];
 
     const mockedMetaMaskState =
       getMetaMaskStateWithUnapprovedApproveTransaction(account.address);
-    const transaction = mockedMetaMaskState.transactions[0];
+    const transaction = mockedMetaMaskState.TxController.transactions[0];
     transaction.txParams.gas = '0x0';
 
     await act(async () => {
@@ -252,15 +258,15 @@ describe('Contract Interaction Confirmation Alerts', () => {
 
   it('displays the alert for no gas price', async () => {
     const account =
-      mockMetaMaskState.internalAccounts.accounts[
-        mockMetaMaskState.internalAccounts
-          .selectedAccount as keyof typeof mockMetaMaskState.internalAccounts.accounts
+      mockMetaMaskState.AccountsController.internalAccounts.accounts[
+        mockMetaMaskState.AccountsController.internalAccounts
+          .selectedAccount as keyof typeof mockMetaMaskState.AccountsController.internalAccounts.accounts
       ];
 
     const mockedMetaMaskState =
       getMetaMaskStateWithUnapprovedApproveTransaction(account.address);
 
-    const transaction = mockedMetaMaskState.transactions[0];
+    const transaction = mockedMetaMaskState.TxController.transactions[0];
     transaction.gasFeeEstimates.type = 'none';
 
     await act(async () => {
@@ -298,14 +304,15 @@ describe('Contract Interaction Confirmation Alerts', () => {
 
   it('displays the alert for pending transactions', async () => {
     const account =
-      mockMetaMaskState.internalAccounts.accounts[
-        mockMetaMaskState.internalAccounts
-          .selectedAccount as keyof typeof mockMetaMaskState.internalAccounts.accounts
+      mockMetaMaskState.AccountsController.internalAccounts.accounts[
+        mockMetaMaskState.AccountsController.internalAccounts
+          .selectedAccount as keyof typeof mockMetaMaskState.AccountsController.internalAccounts.accounts
       ];
 
     const mockedMetaMaskState =
       getMetaMaskStateWithUnapprovedApproveTransaction(account.address);
-    const unapprovedTransaction = mockedMetaMaskState.transactions[0];
+    const unapprovedTransaction =
+      mockedMetaMaskState.TxController.transactions[0];
     const submittedTransaction = getUnapprovedApproveTransaction(
       account.address,
       randomUUID(),
@@ -368,15 +375,15 @@ describe('Contract Interaction Confirmation Alerts', () => {
 
   it('displays the alert for gas fees too low', async () => {
     const account =
-      mockMetaMaskState.internalAccounts.accounts[
-        mockMetaMaskState.internalAccounts
-          .selectedAccount as keyof typeof mockMetaMaskState.internalAccounts.accounts
+      mockMetaMaskState.AccountsController.internalAccounts.accounts[
+        mockMetaMaskState.AccountsController.internalAccounts
+          .selectedAccount as keyof typeof mockMetaMaskState.AccountsController.internalAccounts.accounts
       ];
 
     const mockedMetaMaskState =
       getMetaMaskStateWithUnapprovedApproveTransaction(account.address);
 
-    const transaction = mockedMetaMaskState.transactions[0];
+    const transaction = mockedMetaMaskState.TxController.transactions[0];
     transaction.defaultGasEstimates.estimateType = 'low';
     transaction.userFeeLevel = 'low';
 

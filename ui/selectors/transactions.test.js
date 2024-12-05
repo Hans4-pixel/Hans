@@ -143,9 +143,10 @@ describe('Transaction Selectors', () => {
 
     it('returns an empty array if there are no smart transactions in state', () => {
       const state = createState();
-      state.metamask.smartTransactionsState.smartTransactions = {
-        [CHAIN_IDS.MAINNET]: [],
-      };
+      state.metamask.SmartTransactionsController.smartTransactionsState.smartTransactions =
+        {
+          [CHAIN_IDS.MAINNET]: [],
+        };
 
       const result = smartTransactionsListSelector(state);
 
@@ -386,8 +387,8 @@ describe('Transaction Selectors', () => {
 
       expect(Array.isArray(selectedTx)).toStrictEqual(true);
       expect(selectedTx).toStrictEqual([
-        state.metamask.transactions[1],
-        state.metamask.transactions[0],
+        state.metamask.TxController.transactions[1],
+        state.metamask.TxController.transactions[0],
       ]);
     });
     it('should not duplicate incoming transactions', () => {
@@ -448,8 +449,8 @@ describe('Transaction Selectors', () => {
 
       expect(Array.isArray(selectedTx)).toStrictEqual(true);
       expect(selectedTx).toStrictEqual([
-        state.metamask.transactions[1],
-        state.metamask.transactions[0],
+        state.metamask.TxController.transactions[1],
+        state.metamask.TxController.transactions[0],
       ]);
     });
   });
@@ -704,7 +705,8 @@ describe('Transaction Selectors', () => {
     });
 
     it('should return true if there is a pending transaction on different network', () => {
-      mockedState.metamask.transactions[0].chainId = 'differentChainId';
+      mockedState.metamask.TxController.transactions[0].chainId =
+        'differentChainId';
       const result = hasTransactionPendingApprovals(mockedState);
       expect(result).toBe(true);
     });
@@ -777,9 +779,9 @@ describe('Transaction Selectors', () => {
       const results = getApprovedAndSignedTransactions(state);
 
       expect(results).toStrictEqual([
-        state.metamask.transactions[0],
-        state.metamask.transactions[3],
-        state.metamask.transactions[4],
+        state.metamask.TxController.transactions[0],
+        state.metamask.TxController.transactions[3],
+        state.metamask.TxController.transactions[4],
       ]);
     });
 
@@ -847,7 +849,7 @@ describe('Transaction Selectors', () => {
 
       const results = getTransactions(state);
 
-      expect(results).toStrictEqual(state.metamask.transactions);
+      expect(results).toStrictEqual(state.metamask.TxController.transactions);
     });
 
     it('returns an empty array if there are no transactions', () => {

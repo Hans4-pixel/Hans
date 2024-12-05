@@ -28,40 +28,46 @@ const getMetaMaskStateWithUnapprovedPersonalSign = (accountAddress: string) => {
   const pendingPersonalSignTime = new Date().getTime();
   return {
     ...mockMetaMaskState,
-    preferences: {
-      ...mockMetaMaskState.preferences,
-      redesignedConfirmationsEnabled: true,
+    PreferencesController: {
+      preferences: {
+        ...mockMetaMaskState.PreferencesController.preferences,
+        redesignedConfirmationsEnabled: true,
+      },
     },
-    unapprovedPersonalMsgs: {
-      [pendingPersonalSignId]: {
-        id: pendingPersonalSignId,
-        chainId: CHAIN_IDS.SEPOLIA,
-        status: 'unapproved',
-        time: pendingPersonalSignTime,
-        type: MESSAGE_TYPE.PERSONAL_SIGN,
-        securityProviderResponse: null,
-        msgParams: {
-          from: accountAddress,
-          data: '0x4578616d706c652060706572736f6e616c5f7369676e60206d657373616765',
-          origin: 'https://metamask.github.io',
-          siwe: { isSIWEMessage: false, parsedMessage: null },
-          signatureMethod: ApprovalType.PersonalSign,
+    SignatureController: {
+      unapprovedPersonalMsgs: {
+        [pendingPersonalSignId]: {
+          id: pendingPersonalSignId,
+          chainId: CHAIN_IDS.SEPOLIA,
+          status: 'unapproved',
+          time: pendingPersonalSignTime,
+          type: MESSAGE_TYPE.PERSONAL_SIGN,
+          securityProviderResponse: null,
+          msgParams: {
+            from: accountAddress,
+            data: '0x4578616d706c652060706572736f6e616c5f7369676e60206d657373616765',
+            origin: 'https://metamask.github.io',
+            siwe: { isSIWEMessage: false, parsedMessage: null },
+            signatureMethod: ApprovalType.PersonalSign,
+          },
         },
       },
+      unapprovedPersonalMsgCount: 1,
     },
-    unapprovedPersonalMsgCount: 1,
-    pendingApprovals: {
-      [pendingPersonalSignId]: {
-        id: pendingPersonalSignId,
-        origin: 'origin',
-        time: pendingPersonalSignTime,
-        type: ApprovalType.PersonalSign,
-        requestData: {},
-        requestState: null,
-        expectsResult: false,
+    ApprovalControlelr: {
+      pendingApprovals: {
+        [pendingPersonalSignId]: {
+          id: pendingPersonalSignId,
+          origin: 'origin',
+          time: pendingPersonalSignTime,
+          type: ApprovalType.PersonalSign,
+          requestData: {},
+          requestState: null,
+          expectsResult: false,
+        },
       },
+      pendingApprovalCount: 1,
     },
-    pendingApprovalCount: 1,
   };
 };
 
@@ -72,9 +78,9 @@ describe('PersonalSign Confirmation', () => {
 
   it('displays the header account modal with correct data', async () => {
     const account =
-      mockMetaMaskState.internalAccounts.accounts[
-        mockMetaMaskState.internalAccounts
-          .selectedAccount as keyof typeof mockMetaMaskState.internalAccounts.accounts
+      mockMetaMaskState.AccountsController.internalAccounts.accounts[
+        mockMetaMaskState.AccountsController.internalAccounts
+          .selectedAccount as keyof typeof mockMetaMaskState.AccountsController.internalAccounts.accounts
       ];
 
     const accountName = account.metadata.name;
@@ -152,9 +158,9 @@ describe('PersonalSign Confirmation', () => {
 
   it('displays the expected title data', async () => {
     const account =
-      mockMetaMaskState.internalAccounts.accounts[
-        mockMetaMaskState.internalAccounts
-          .selectedAccount as keyof typeof mockMetaMaskState.internalAccounts.accounts
+      mockMetaMaskState.AccountsController.internalAccounts.accounts[
+        mockMetaMaskState.AccountsController.internalAccounts
+          .selectedAccount as keyof typeof mockMetaMaskState.AccountsController.internalAccounts.accounts
       ];
 
     const mockedMetaMaskState = getMetaMaskStateWithUnapprovedPersonalSign(
@@ -176,13 +182,13 @@ describe('PersonalSign Confirmation', () => {
 
   it('displays the MMI header warning when account signing is not the same as the account selected', async () => {
     const account =
-      mockMetaMaskState.internalAccounts.accounts[
+      mockMetaMaskState.AccountsController.internalAccounts.accounts[
         '07c2cfec-36c9-46c4-8115-3836d3ac9047'
       ];
     const selectedAccount =
-      mockMetaMaskState.internalAccounts.accounts[
-        mockMetaMaskState.internalAccounts
-          .selectedAccount as keyof typeof mockMetaMaskState.internalAccounts.accounts
+      mockMetaMaskState.AccountsController.internalAccounts.accounts[
+        mockMetaMaskState.AccountsController.internalAccounts
+          .selectedAccount as keyof typeof mockMetaMaskState.AccountsController.internalAccounts.accounts
       ];
 
     const mockedMetaMaskState = getMetaMaskStateWithUnapprovedPersonalSign(

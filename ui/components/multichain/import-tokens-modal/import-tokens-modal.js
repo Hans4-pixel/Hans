@@ -122,7 +122,7 @@ export const ImportTokensModal = ({ onClose }) => {
 
   const tokenList = useSelector(getTokenList);
   const useTokenDetection = useSelector(
-    ({ metamask }) => metamask.useTokenDetection,
+    ({ metamask }) => metamask.PreferencesController.useTokenDetection,
   );
   const networkName = useSelector(getTokenDetectionSupportNetworkByChainId);
   const nativeCurrency = useSelector(getNativeCurrency);
@@ -137,7 +137,7 @@ export const ImportTokensModal = ({ onClose }) => {
   const selectedAccount = useSelector(getSelectedInternalAccount);
   const isMainnet = useSelector(getIsMainnet);
   const accounts = useSelector(getInternalAccounts);
-  const tokens = useSelector((state) => state.metamask.tokens);
+  const tokens = useSelector((state) => state.metamask.TokensController.tokens);
   const rpcPrefs = useSelector(getRpcPrefsForCurrentProvider);
   const contractExchangeRates = useSelector(getTokenExchangeRates);
 

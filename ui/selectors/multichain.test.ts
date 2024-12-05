@@ -156,8 +156,8 @@ describe('Multichain Selectors', () => {
 
     it('returns an EVM network provider if user is not onboarded', () => {
       const state = getEvmState();
-      state.metamask.completedOnboarding = false;
-      state.metamask.internalAccounts.selectedAccount = '';
+      state.metamask.OnboardingController.completedOnboarding = false;
+      state.metamask.AccountsController.internalAccounts.selectedAccount = '';
 
       const network = getMultichainNetwork(state);
       expect(network.isEvmNetwork).toBe(true);
@@ -264,14 +264,14 @@ describe('Multichain Selectors', () => {
       (currency: string) => {
         const state = getEvmState();
 
-        state.metamask.currentCurrency = currency;
+        state.metamask.CurrencyController.currentCurrency = currency;
         expect(getCurrentCurrency(state)).toBe(currency);
         expect(getMultichainCurrentCurrency(state)).toBe(currency);
       },
     );
 
     it('fallbacks to ticker as currency if account is non-EVM (bip122:*)', () => {
-      const state = getNonEvmState(); // .currentCurrency = 'ETH'
+      const state = getNonEvmState(); // .CurrencyController.currentCurrency = 'ETH'
 
       const bip122ProviderConfig = getBip122ProviderConfig();
       expect(getCurrentCurrency(state).toLowerCase()).not.toBe('usd');
@@ -436,9 +436,13 @@ describe('Multichain Selectors', () => {
         asset: MultichainNativeAssets;
       }) => {
         const state = getNonEvmState(account);
-        const balance = state.metamask.balances[account.id][asset].amount;
+        const balance =
+          state.metamask.MultichainBalancesController.balances[account.id][
+            asset
+          ].amount;
 
-        state.metamask.internalAccounts.selectedAccount = account.id;
+        state.metamask.AccountsController.internalAccounts.selectedAccount =
+          account.id;
         expect(getMultichainSelectedAccountCachedBalance(state)).toBe(balance);
       },
     );
@@ -459,7 +463,7 @@ describe('Multichain Selectors', () => {
   describe('getMultichainSelectedAccountCachedBalanceIsZero', () => {
     it('returns true if the selected EVM account has a zero balance', () => {
       const state = getEvmState();
-      state.metamask.accountsByChainId['0x1'][
+      state.metamask.AccountTracker.accountsByChainId['0x1'][
         MOCK_ACCOUNT_EOA.address
       ].balance = '0x00';
       expect(getMultichainSelectedAccountCachedBalanceIsZero(state)).toBe(true);
@@ -467,7 +471,7 @@ describe('Multichain Selectors', () => {
 
     it('returns false if the selected EVM account has a non-zero balance', () => {
       const state = getEvmState();
-      state.metamask.accountsByChainId['0x1'][
+      state.metamask.AccountTracker.accountsByChainId['0x1'][
         MOCK_ACCOUNT_EOA.address
       ].balance = '3';
       expect(getMultichainSelectedAccountCachedBalanceIsZero(state)).toBe(
@@ -477,17 +481,17 @@ describe('Multichain Selectors', () => {
 
     it('returns true if the selected non-EVM account has a zero balance', () => {
       const state = getNonEvmState(MOCK_ACCOUNT_BIP122_P2WPKH);
-      state.metamask.balances[MOCK_ACCOUNT_BIP122_P2WPKH.id][
-        MultichainNativeAssets.BITCOIN
-      ].amount = '0.00000000';
+      state.metamask.MultichainBalancesController.balances[
+        MOCK_ACCOUNT_BIP122_P2WPKH.id
+      ][MultichainNativeAssets.BITCOIN].amount = '0.00000000';
       expect(getMultichainSelectedAccountCachedBalanceIsZero(state)).toBe(true);
     });
 
     it('returns false if the selected non-EVM account has a non-zero balance', () => {
       const state = getNonEvmState(MOCK_ACCOUNT_BIP122_P2WPKH);
-      state.metamask.balances[MOCK_ACCOUNT_BIP122_P2WPKH.id][
-        MultichainNativeAssets.BITCOIN
-      ].amount = '1.00000000';
+      state.metamask.MultichainBalancesController.balances[
+        MOCK_ACCOUNT_BIP122_P2WPKH.id
+      ][MultichainNativeAssets.BITCOIN].amount = '1.00000000';
       expect(getMultichainSelectedAccountCachedBalanceIsZero(state)).toBe(
         false,
       );

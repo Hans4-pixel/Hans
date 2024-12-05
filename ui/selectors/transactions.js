@@ -131,17 +131,17 @@ export const incomingTxListSelector = createDeepEqualSelector(
 );
 
 export const unapprovedPersonalMsgsSelector = (state) =>
-  state.metamask.unapprovedPersonalMsgs;
+  state.metamask.SignatureController.PersonalMsgs;
 export const unapprovedDecryptMsgsSelector = (state) =>
-  state.metamask.unapprovedDecryptMsgs;
+  state.metamask.DecryptMessageController.unapprovedDecryptMsgs;
 export const unapprovedEncryptionPublicKeyMsgsSelector = (state) =>
-  state.metamask.unapprovedEncryptionPublicKeyMsgs;
+  state.metamask.EncryptionPublicKeyController.EncryptionPublicKeyMsgs;
 export const unapprovedTypedMessagesSelector = (state) =>
-  state.metamask.unapprovedTypedMessages;
+  state.metamask.SignatureController.TypedMessages;
 
 export const smartTransactionsListSelector = (state) => {
   const { address: selectedAddress } = getSelectedInternalAccount(state);
-  return state.metamask.smartTransactionsState?.smartTransactions?.[
+  return state.metamask.SmartTransactionsController.smartTransactionsState?.smartTransactions?.[
     getCurrentChainId(state)
   ]
     ?.filter((smartTransaction) => {
@@ -663,7 +663,7 @@ export function hasTransactionPendingApprovals(state) {
 }
 
 export function selectTransactionMetadata(state, transactionId) {
-  return state.metamask.transactions.find(
+  return state.metamask.TxController.transactions.find(
     (transaction) => transaction.id === transactionId,
   );
 }

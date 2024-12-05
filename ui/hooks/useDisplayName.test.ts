@@ -58,7 +58,7 @@ describe('useDisplayName', () => {
     symbol: string,
     image: string,
   ) {
-    state.metamask.tokensChainsCache = {
+    state.metamask.TokenListController.tokensChainsCache = {
       [variation]: {
         data: {
           [value]: {
@@ -72,7 +72,7 @@ describe('useDisplayName', () => {
   }
 
   function mockWatchedNFTName(value: string, variation: string, name: string) {
-    state.metamask.allNftContracts = {
+    state.metamask.NftController.allNftContracts = {
       '0x123': {
         [variation]: [{ address: value, name }],
       },

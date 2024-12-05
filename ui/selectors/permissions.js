@@ -23,7 +23,7 @@ import { getSelectedInternalAccount } from './accounts';
  * @returns {object} The permissions subjects object.
  */
 export const getPermissionSubjectsDeepEqual = createDeepEqualSelector(
-  (state) => state.metamask.subjects || {},
+  (state) => state.metamask.PermissionController.subjects || {},
   (subjects) => subjects,
 );
 
@@ -34,7 +34,7 @@ export const getPermissionSubjectsDeepEqual = createDeepEqualSelector(
  * @returns {object} The subject metadata object.
  */
 export const getSubjectMetadataDeepEqual = createDeepEqualSelector(
-  (state) => state.metamask.subjectMetadata,
+  (state) => state.metamask.SubjectMetadataController.subjectMetadata,
   (metadata) => metadata,
 );
 
@@ -45,7 +45,7 @@ export const getSubjectMetadataDeepEqual = createDeepEqualSelector(
  * @returns {object} The permissions subjects object.
  */
 export function getPermissionSubjects(state) {
-  return state.metamask.subjects || {};
+  return state.metamask.PermissionController.subjects || {};
 }
 
 /**
@@ -120,7 +120,7 @@ export function getPermittedChainsByOrigin(state) {
 }
 
 export function getSubjectMetadata(state) {
-  return state.metamask.subjectMetadata;
+  return state.metamask.SubjectMetadataController.subjectMetadata;
 }
 
 /**
@@ -324,7 +324,7 @@ function getAccountsCaveatFromPermission(accountsPermission = {}) {
 }
 
 function subjectSelector(state, origin) {
-  return origin && state.metamask.subjects?.[origin];
+  return origin && state.metamask.PermissionController.subjects?.[origin];
 }
 
 export function getAccountToConnectToActiveTab(state) {
@@ -473,7 +473,7 @@ export function getLastConnectedInfo(state) {
 }
 
 export function getSnapInstallOrUpdateRequests(state) {
-  return Object.values(state.metamask.pendingApprovals)
+  return Object.values(state.metamask.ApprovalController.pendingApprovals)
     .filter(
       ({ type }) =>
         type === 'wallet_installSnap' ||
@@ -504,9 +504,9 @@ export function getPermissions(state, origin) {
 }
 
 export function getRequestState(state, id) {
-  return state.metamask.pendingApprovals[id]?.requestState;
+  return state.metamask.ApprovalController.pendingApprovals[id]?.requestState;
 }
 
 export function getRequestType(state, id) {
-  return state.metamask.pendingApprovals[id]?.type;
+  return state.metamask.ApprovalController.pendingApprovals[id]?.type;
 }

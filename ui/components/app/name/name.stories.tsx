@@ -145,9 +145,9 @@ export const SavedNameStory = {
     type: NameType.ETHEREUM_ADDRESS,
     variation: VARIATION_MOCK,
     state: (state) => {
-      state.metamask.names[NameType.ETHEREUM_ADDRESS][ADDRESS_MOCK][
-        VARIATION_MOCK
-      ].name = NAME_MOCK;
+      state.metamask.NameController.names[NameType.ETHEREUM_ADDRESS][
+        ADDRESS_MOCK
+      ][VARIATION_MOCK].name = NAME_MOCK;
     },
   },
 };
@@ -163,7 +163,7 @@ export const DefaultTokenNameStory = {
     type: NameType.ETHEREUM_ADDRESS,
     variation: VARIATION_MOCK,
     state: (state) => {
-      state.metamask.tokensChainsCache = {
+      state.metamask.TokenListController.tokensChainsCache = {
         [VARIATION_MOCK]: {
           data: {
             [ADDRESS_MOCK]: {
@@ -191,7 +191,7 @@ export const DefaultWatchedNFTNameStory = {
     type: NameType.ETHEREUM_ADDRESS,
     variation: VARIATION_MOCK,
     state: (state) => {
-      state.metamask.allNftContracts = {
+      state.metamask.NftController.allNftContracts = {
         '0x123': {
           [VARIATION_MOCK]: [
             {

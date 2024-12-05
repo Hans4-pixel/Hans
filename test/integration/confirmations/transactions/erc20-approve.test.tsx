@@ -29,15 +29,15 @@ const getMetaMaskStateWithUnapprovedApproveTransaction = (opts?: {
   showAdvanceDetails: boolean;
 }) => {
   const account =
-    mockMetaMaskState.internalAccounts.accounts[
-      mockMetaMaskState.internalAccounts
-        .selectedAccount as keyof typeof mockMetaMaskState.internalAccounts.accounts
+    mockMetaMaskState.AccountsController.internalAccounts.accounts[
+      mockMetaMaskState.AccountsController.internalAccounts
+        .selectedAccount as keyof typeof mockMetaMaskState.AccountsController.internalAccounts.accounts
     ];
 
   return {
     ...mockMetaMaskState,
     preferences: {
-      ...mockMetaMaskState.preferences,
+      ...mockMetaMaskState.PreferencesController.preferences,
       redesignedConfirmationsEnabled: true,
       showConfirmationAdvancedDetails: opts?.showAdvanceDetails ?? false,
     },
