@@ -629,7 +629,7 @@
     },
     "@metamask/announcement-controller": {
       "packages": {
-        "@metamask/announcement-controller>@metamask/base-controller": true
+        "@metamask/base-controller": true
       }
     },
     "@metamask/announcement-controller>@metamask/base-controller": {
@@ -1663,33 +1663,10 @@
         "fetch": true
       },
       "packages": {
+        "@metamask/base-controller": true,
         "@metamask/controller-utils": true,
-        "@metamask/name-controller>@metamask/base-controller": true,
-        "@metamask/name-controller>@metamask/utils": true,
-        "@metamask/name-controller>async-mutex": true
-      }
-    },
-    "@metamask/name-controller>@metamask/base-controller": {
-      "globals": {
-        "setTimeout": true
-      },
-      "packages": {
-        "immer": true
-      }
-    },
-    "@metamask/name-controller>@metamask/utils": {
-      "globals": {
-        "TextDecoder": true,
-        "TextEncoder": true
-      },
-      "packages": {
-        "@metamask/utils>@metamask/superstruct": true,
-        "@metamask/utils>@scure/base": true,
-        "@metamask/utils>pony-cause": true,
-        "@noble/hashes": true,
-        "browserify>buffer": true,
-        "nock>debug": true,
-        "semver": true
+        "@metamask/name-controller>async-mutex": true,
+        "@metamask/utils": true
       }
     },
     "@metamask/name-controller>async-mutex": {
@@ -1980,22 +1957,7 @@
     "@metamask/permission-log-controller": {
       "packages": {
         "@metamask/base-controller": true,
-        "@metamask/permission-log-controller>@metamask/utils": true
-      }
-    },
-    "@metamask/permission-log-controller>@metamask/utils": {
-      "globals": {
-        "TextDecoder": true,
-        "TextEncoder": true
-      },
-      "packages": {
-        "@metamask/utils>@metamask/superstruct": true,
-        "@metamask/utils>@scure/base": true,
-        "@metamask/utils>pony-cause": true,
-        "@noble/hashes": true,
-        "browserify>buffer": true,
-        "nock>debug": true,
-        "semver": true
+        "@metamask/utils": true
       }
     },
     "@metamask/phishing-controller": {
@@ -2136,6 +2098,7 @@
         "@metamask/keyring-api": true,
         "@metamask/keyring-controller": true,
         "@metamask/message-signing-snap>@noble/ciphers": true,
+        "@metamask/network-controller": true,
         "@metamask/profile-sync-controller>siwe": true,
         "@noble/hashes": true,
         "browserify>buffer": true,
