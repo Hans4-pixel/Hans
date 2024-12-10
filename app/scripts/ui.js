@@ -362,6 +362,14 @@ function setupWeb3Connection(connectionStream) {
   });
   connectionStream.on('error', console.error.bind(console));
   providerStream.on('error', console.error.bind(console));
+  (async () => {
+    try {
+      await providerStream.initialize();
+      console.log('Provider initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize provider:', error);
+    }
+  })();
   global.ethereumProvider = providerStream;
   global.ethQuery = new EthQuery(providerStream);
   global.eth = new Eth(providerStream);
