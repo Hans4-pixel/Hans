@@ -31,7 +31,7 @@ export type Asset = {
   symbol: string;
   name: string;
   decimals: number;
-  icon?: string;
+  icon?: string | null;
 };
 
 export type SrcChainStatus = {
