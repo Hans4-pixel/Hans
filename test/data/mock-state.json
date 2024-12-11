@@ -11,8 +11,6 @@
   },
   "appState": {
     "isAccountMenuOpen": false,
-    "confirmationExchangeRates": {},
-    "customTokenAmount": "10",
     "networkDropdownOpen": false,
     "importNftsModal": {
       "open": false
@@ -29,7 +27,9 @@
         "name": null
       }
     },
-    "warning": null
+    "warning": null,
+    "customTokenAmount": "10",
+    "confirmationExchangeRates": {}
   },
   "confirmAlerts": {
     "alerts": [],
