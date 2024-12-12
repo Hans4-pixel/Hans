@@ -5284,6 +5284,9 @@
   "smartTransactions": {
     "message": "Smart Transactions"
   },
+  "smartTransactionsEnabled": {
+    "message": "You're now protected with MetaMask Smart Transactions"
+  },
   "snapAccountCreated": {
     "message": "Account created"
   },
