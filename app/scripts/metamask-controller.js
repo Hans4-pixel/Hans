@@ -2562,12 +2562,10 @@ export default class MetamaskController extends EventEmitter {
       SnapInterfaceController: this.snapInterfaceController,
       SnapInsightsController: this.snapInsightsController,
       ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
-      CustodyController: this.custodyController.store,
-      InstitutionalFeaturesController:
-        this.institutionalFeaturesController.store,
-      MmiConfigurationController: this.mmiConfigurationController.store,
+      CustodyController: this.custodyController,
+      InstitutionalFeaturesController: this.institutionalFeaturesController,
+      MmiConfigurationController: this.mmiConfigurationController,
       ///: END:ONLY_INCLUDE_IF
-      PPOMController: this.ppomController,
       NameController: this.nameController,
       UserOperationController: this.userOperationController,
       // Notification Controllers
@@ -2618,10 +2616,9 @@ export default class MetamaskController extends EventEmitter {
         SnapInterfaceController: this.snapInterfaceController,
         SnapInsightsController: this.snapInsightsController,
         ///: BEGIN:ONLY_INCLUDE_IF(build-mmi)
-        CustodyController: this.custodyController.store,
-        InstitutionalFeaturesController:
-          this.institutionalFeaturesController.store,
-        MmiConfigurationController: this.mmiConfigurationController.store,
+        CustodyController: this.custodyController,
+        InstitutionalFeaturesController: this.institutionalFeaturesController,
+        MmiConfigurationController: this.mmiConfigurationController,
         ///: END:ONLY_INCLUDE_IF
         NameController: this.nameController,
         UserOperationController: this.userOperationController,
@@ -3379,11 +3376,10 @@ export default class MetamaskController extends EventEmitter {
   getState() {
     const { vault } = this.keyringController.state;
     const isInitialized = Boolean(vault);
-    const flatState = this.memStore.getFlatState();
 
     return {
       isInitialized,
-      ...sanitizeUIState(flatState),
+      ...sanitizeUIState(this.memStore.getState()),
     };
   }
 
